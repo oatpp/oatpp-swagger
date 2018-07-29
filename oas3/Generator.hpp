@@ -44,6 +44,8 @@ public:
   
 public:
   
+  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type);
+  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type);
   static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type);
   static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem);
   static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints);

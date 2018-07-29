@@ -77,6 +77,8 @@ class Schema : public oatpp::data::mapping::type::Object {
   
   DTO_FIELD(String, type); // integer, string
   DTO_FIELD(String, format); // int32, int64
+  DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, properties);
+  DTO_FIELD(Schema::ObjectWrapper, items);
   
 };
   
@@ -97,6 +99,15 @@ class OperationResponse : public oatpp::data::mapping::type::Object {
   
 };
   
+class RequestBody : public oatpp::data::mapping::type::Object {
+  
+  DTO_INIT(RequestBody, Object)
+  
+  DTO_FIELD(String, description);
+  DTO_FIELD(Fields<MediaTypeObject::ObjectWrapper>::ObjectWrapper, content);
+  
+};
+  
 class PathItemOperation : public oatpp::data::mapping::type::Object {
   
   DTO_INIT(PathItemOperation, Object)
@@ -104,6 +115,7 @@ class PathItemOperation : public oatpp::data::mapping::type::Object {
   DTO_FIELD(String, description);
   DTO_FIELD(String, summary);
   DTO_FIELD(String, operationId);
+  DTO_FIELD(RequestBody::ObjectWrapper, requestBody);
   DTO_FIELD(List<String>::ObjectWrapper, tags);
   DTO_FIELD(Fields<OperationResponse::ObjectWrapper>::ObjectWrapper, responses);
   

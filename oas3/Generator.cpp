@@ -25,37 +25,75 @@
 #include "Generator.hpp"
 
 namespace oatpp { namespace swagger { namespace oas3 {
+ 
+Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type) {
+  
+  auto result = Schema::createShared();
+  result->type = "object";
+  result->properties = result->properties->createShared();
+  
+  auto properties = type->properties;
+  if(properties->getList().size() == 0) {
+    type->creator(); // init type by creating first instance of that type
+  }
+  
+  auto it = properties->getList().begin();
+  while (it != properties->getList().end()) {
+    auto p = *it ++;
+    result->properties->put(p->name, generateSchemaForType(p->type));
+  }
+  
+  return result;
+  
+}
+  
+Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type) {
+  auto result = Schema::createShared();
+  result->type = "array";
+  result->items = generateSchemaForType(*type->params.begin());
+  return result;
+}
   
 Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type) {
   
-  auto result = Schema::createShared();
-  
   auto typeName = type->name;
   if(typeName == oatpp::data::mapping::type::__class::String::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "string";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::Int32::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "integer";
     result->format = "int32";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::Int64::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "integer";
     result->format = "int64";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::Float32::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "number";
     result->format = "float";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::Float64::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "number";
     result->format = "double";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::Boolean::CLASS_NAME){
+    auto result = Schema::createShared();
     result->type = "boolean";
+    return result;
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
-    // TODO
+    return generateSchemaForTypeObject(type);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
-    // TODO
+    return generateSchemaForTypeList(type);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
     // TODO
   }
   
-  return result;
+  return Schema::createShared();
   
 }
   
@@ -99,6 +137,19 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       response->content->put("test/plain", mediaType);
       
       operation->responses->put("200", response);
+      
+    }
+    
+    if(info->body.name != nullptr) {
+      
+      operation->requestBody = RequestBody::createShared();
+      operation->requestBody->description = "request body";
+      
+      auto mediaType = MediaTypeObject::createShared();
+      mediaType->schema = generateSchemaForType(info->body.type);
+      
+      operation->requestBody->content = operation->requestBody->content->createShared();
+      operation->requestBody->content->put("application/json", mediaType);
       
     }
     
