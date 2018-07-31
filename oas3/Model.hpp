@@ -25,6 +25,8 @@
 #ifndef oatpp_swagger_oas3_Model_hpp
 #define oatpp_swagger_oas3_Model_hpp
 
+#include "oatpp-swagger/Model.hpp"
+
 #include "oatpp/core/data/mapping/type/Object.hpp"
 #include "oatpp/core/macro/codegen.hpp"
 
@@ -39,6 +41,17 @@ class Contact : public oatpp::data::mapping::type::Object {
   DTO_FIELD(String, url);
   DTO_FIELD(String, email);
   
+  static ObjectWrapper createFromBaseModel(const std::shared_ptr<oatpp::swagger::Contact>& model) {
+    if(model) {
+      auto result = createShared();
+      result->name = model->name;
+      result->url = model->url;
+      result->email = model->email;
+      return result;
+    }
+    return nullptr;
+  }
+  
 };
 
 class License : public oatpp::data::mapping::type::Object {
@@ -47,6 +60,16 @@ class License : public oatpp::data::mapping::type::Object {
   
   DTO_FIELD(String, name);
   DTO_FIELD(String, url);
+  
+  static ObjectWrapper createFromBaseModel(const std::shared_ptr<oatpp::swagger::License>& model) {
+    if(model) {
+      auto result = createShared();
+      result->name = model->name;
+      result->url = model->url;
+      return result;
+    }
+    return nullptr;
+  }
   
 };
 
@@ -61,13 +84,90 @@ class Info : public oatpp::data::mapping::type::Object {
   DTO_FIELD(License::ObjectWrapper, license);
   DTO_FIELD(String, version);
   
+  static ObjectWrapper createFromBaseModel(const std::shared_ptr<oatpp::swagger::DocumentHeader>& model) {
+    if(model) {
+      auto result = createShared();
+      result->title = model->title;
+      result->description = model->description;
+      result->termsOfService = model->termsOfService;
+      result->contact = Contact::createFromBaseModel(model->contact);
+      result->license = License::createFromBaseModel(model->license);
+      result->version = model->version;
+      return result;
+    }
+    return nullptr;
+  }
+  
 };
 
+class ServerVariable : public oatpp::data::mapping::type::Object {
+  
+  DTO_INIT(ServerVariable, Object)
+  
+  DTO_FIELD(String, description);
+  DTO_FIELD(List<String>::ObjectWrapper, enumValues, "enum");
+  DTO_FIELD(String, defaultValue, "default");
+  
+  static ObjectWrapper createFromBaseModel(const std::shared_ptr<oatpp::swagger::ServerVariable>& model) {
+    
+    if(model) {
+      
+      auto result = createShared();
+      result->description = model->description;
+      result->defaultValue = model->defaultValue;
+      
+      if(model->enumValues) {
+        
+        result->enumValues = List<String>::createShared();
+        
+        auto curr = model->enumValues->getFirstNode();
+        while(curr != nullptr) {
+          result->enumValues->pushBack(curr->getData());
+          curr = curr->getNext();
+        }
+        
+      }
+      
+      return result;
+      
+    }
+    
+    return nullptr;
+    
+  }
+  
+};
+  
 class Server : public oatpp::data::mapping::type::Object {
   
   DTO_INIT(Server, Object)
   
   DTO_FIELD(String, url);
+  DTO_FIELD(String, description);
+  DTO_FIELD(Fields<ServerVariable::ObjectWrapper>::ObjectWrapper, variables);
+  
+  static ObjectWrapper createFromBaseModel(const std::shared_ptr<oatpp::swagger::Server>& model) {
+    if(model) {
+      auto result = createShared();
+      result->url = model->url;
+      result->description = model->description;
+      
+      if(model->variables) {
+        
+        result->variables = Fields<ServerVariable::ObjectWrapper>::createShared();
+        
+        auto curr = model->variables->getFirstEntry();
+        while (curr != nullptr) {
+          result->variables->put(curr->getKey(), ServerVariable::createFromBaseModel(curr->getValue()));
+          curr = curr->getNext();
+        }
+        
+      }
+      
+      return result;
+    }
+    return nullptr;
+  }
   
 };
   

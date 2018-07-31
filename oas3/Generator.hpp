@@ -25,7 +25,7 @@
 #ifndef oatpp_swagger_oas3_Generator_hpp
 #define oatpp_swagger_oas3_Generator_hpp
 
-#include "./Model.hpp"
+#include "oatpp-swagger/oas3/Model.hpp"
 
 #include "oatpp/web/server/api/Endpoint.hpp"
 #include "oatpp/core/collection/LinkedList.hpp"
@@ -63,7 +63,7 @@ public:
   
   static Components::ObjectWrapper generateComponents(const UsedSchemas& usedSchemas);
   
-  static Document::ObjectWrapper generateDocument(const Info::ObjectWrapper& info, const std::shared_ptr<Endpoints>& endpoints);
+  static Document::ObjectWrapper generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
   
   
   

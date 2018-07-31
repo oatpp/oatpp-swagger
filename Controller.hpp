@@ -47,7 +47,8 @@ protected:
   {}
 public:
   
-  static std::shared_ptr<Controller> createShared(const std::shared_ptr<Endpoints>& endpointsList){
+  static std::shared_ptr<Controller> createShared(const std::shared_ptr<Endpoints>& endpointsList,
+                                                  OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, documentInfo)){
     
     auto serializerConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
     serializerConfig->includeNullFields = false;
@@ -57,20 +58,7 @@ public:
     
     auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared(serializerConfig, deserializerConfig);
     
-    auto info = oas3::Info::createShared();
-    
-    info->title = "My Service Title";
-    info->description = "My Service Description";
-    info->version = "1.0-ver";
-
-    auto document = oas3::Generator::generateDocument(info, endpointsList);
-    
-    auto server = oas3::Server::createShared();
-    server->url = "http://localhost:8000/";
-    
-    auto servers = document->servers->createShared();
-    servers->pushBack(server);
-    document->servers = servers;
+    auto document = oas3::Generator::generateDocument(documentInfo, endpointsList);
     
     return std::shared_ptr<Controller>(new Controller(objectMapper, document));
   }
@@ -80,7 +68,7 @@ public:
    */
 #include OATPP_CODEGEN_BEGIN(ApiController)
   
-  ENDPOINT("GET", "/api", api) {
+  ENDPOINT("GET", "/api-docs/oas-3.0.0.json", api) {
     return createDtoResponse(Status::CODE_200, m_document);
   }
   

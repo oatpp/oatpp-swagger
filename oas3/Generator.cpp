@@ -312,10 +312,21 @@ Components::ObjectWrapper Generator::generateComponents(const UsedSchemas& usedS
   
 }
   
-Document::ObjectWrapper Generator::generateDocument(const Info::ObjectWrapper& info, const std::shared_ptr<Endpoints>& endpoints) {
+Document::ObjectWrapper Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints) {
   
   auto document = oas3::Document::createShared();
-  document->info = info;
+  document->info = Info::createFromBaseModel(docInfo->header);
+  
+  if(docInfo->servers) {
+    document->servers = document->servers->createShared();
+    
+    auto curr = docInfo->servers->getFirstNode();
+    while (curr != nullptr) {
+      document->servers->pushBack(Server::createFromBaseModel(curr->getData()));
+      curr = curr->getNext();
+    }
+    
+  }
   
   UsedSchemas usedSchemas;
   document->paths = generatePaths(endpoints, usedSchemas);
