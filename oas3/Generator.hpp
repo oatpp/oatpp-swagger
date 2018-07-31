@@ -30,6 +30,8 @@
 #include "oatpp/web/server/api/Endpoint.hpp"
 #include "oatpp/core/collection/LinkedList.hpp"
 
+#include <unordered_map>
+
 namespace oatpp { namespace swagger { namespace oas3 {
   
 class Generator {
@@ -42,13 +44,28 @@ public:
   
   typedef Fields<PathItem::ObjectWrapper> Paths;
   
+  typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedSchemas;
+  
 public:
   
-  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type);
-  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type);
-  static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type);
-  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem);
-  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints);
+  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
+  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
+  static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
+
+  static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas);
+  static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas);
+  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedSchemas& usedSchemas);
+  
+  /**
+   *  UsedSchemas& usedSchemas is used to put Types of objects whos schema should be reused
+   */
+  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedSchemas& usedSchemas);
+  
+  static Components::ObjectWrapper generateComponents(const UsedSchemas& usedSchemas);
+  
+  static Document::ObjectWrapper generateDocument(const Info::ObjectWrapper& info, const std::shared_ptr<Endpoints>& endpoints);
+  
+  
   
 };
   

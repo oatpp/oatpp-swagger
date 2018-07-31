@@ -80,6 +80,8 @@ class Schema : public oatpp::data::mapping::type::Object {
   DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, properties);
   DTO_FIELD(Schema::ObjectWrapper, items);
   
+  DTO_FIELD(String, ref, "$ref");
+  
 };
   
 class MediaTypeObject : public oatpp::data::mapping::type::Object {
@@ -127,6 +129,7 @@ class PathItemParameter : public oatpp::data::mapping::type::Object {
   
   DTO_FIELD(String, name);
   DTO_FIELD(String, in); // "query", "header", "path"
+  DTO_FIELD(Boolean, required);
   DTO_FIELD(Schema::ObjectWrapper, schema);
   
 };
@@ -147,6 +150,14 @@ class PathItem : public oatpp::data::mapping::type::Object {
   DTO_FIELD(List<PathItemParameter::ObjectWrapper>::ObjectWrapper, parameters);
   
 };
+  
+class Components : public oatpp::data::mapping::type::Object {
+  
+  DTO_INIT(Components, Object)
+  
+  DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, schemas);
+  
+};
 
 class Document : public oatpp::data::mapping::type::Object {
   
@@ -156,6 +167,7 @@ class Document : public oatpp::data::mapping::type::Object {
   DTO_FIELD(Info::ObjectWrapper, info);
   DTO_FIELD(List<Server::ObjectWrapper>::ObjectWrapper, servers);
   DTO_FIELD(Fields<PathItem::ObjectWrapper>::ObjectWrapper, paths);
+  DTO_FIELD(Components::ObjectWrapper, components);
   
 };
   

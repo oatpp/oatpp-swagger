@@ -57,15 +57,13 @@ public:
     
     auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared(serializerConfig, deserializerConfig);
     
-    auto document = oas3::Document::createShared();
-    
     auto info = oas3::Info::createShared();
     
     info->title = "My Service Title";
     info->description = "My Service Description";
     info->version = "1.0-ver";
-    
-    document->info = info;
+
+    auto document = oas3::Generator::generateDocument(info, endpointsList);
     
     auto server = oas3::Server::createShared();
     server->url = "http://localhost:8000/";
@@ -73,8 +71,6 @@ public:
     auto servers = document->servers->createShared();
     servers->pushBack(server);
     document->servers = servers;
-    
-    document->paths = oas3::Generator::generatePaths(endpointsList);
     
     return std::shared_ptr<Controller>(new Controller(objectMapper, document));
   }

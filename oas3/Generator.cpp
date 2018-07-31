@@ -24,37 +24,48 @@
 
 #include "Generator.hpp"
 
+#include "oatpp/core/utils/ConversionUtils.hpp"
+
 namespace oatpp { namespace swagger { namespace oas3 {
  
-Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type) {
+Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
   
   auto result = Schema::createShared();
-  result->type = "object";
-  result->properties = result->properties->createShared();
+  if(linkSchema) {
   
-  auto properties = type->properties;
-  if(properties->getList().size() == 0) {
-    type->creator(); // init type by creating first instance of that type
+    result->ref = oatpp::String("#/components/schemas/") + type->nameQualifier;
+    usedSchemas[type->nameQualifier] = type;
+    return result;
+  
+  } else {
+    
+    result->type = "object";
+    result->properties = result->properties->createShared();
+    
+    auto properties = type->properties;
+    if(properties->getList().size() == 0) {
+      type->creator(); // init type by creating first instance of that type
+    }
+    
+    auto it = properties->getList().begin();
+    while (it != properties->getList().end()) {
+      auto p = *it ++;
+      result->properties->put(p->name, generateSchemaForType(p->type, linkSchema, usedSchemas));
+    }
+    
+    return result;
   }
-  
-  auto it = properties->getList().begin();
-  while (it != properties->getList().end()) {
-    auto p = *it ++;
-    result->properties->put(p->name, generateSchemaForType(p->type));
-  }
-  
-  return result;
   
 }
   
-Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type) {
+Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
   auto result = Schema::createShared();
   result->type = "array";
-  result->items = generateSchemaForType(*type->params.begin());
+  result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedSchemas);
   return result;
 }
   
-Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type) {
+Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
   
   auto typeName = type->name;
   if(typeName == oatpp::data::mapping::type::__class::String::CLASS_NAME){
@@ -86,9 +97,9 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
     result->type = "boolean";
     return result;
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
-    return generateSchemaForTypeObject(type);
+    return generateSchemaForTypeObject(type, linkSchema, usedSchemas);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
-    return generateSchemaForTypeList(type);
+    return generateSchemaForTypeList(type, linkSchema, usedSchemas);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
     // TODO
   }
@@ -97,7 +108,101 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
   
 }
   
-void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem) {
+RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas) {
+  
+  if(endpointInfo.consumes.size() > 0) {
+    
+    auto body = RequestBody::createShared();
+    body->description = "request body";
+    body->content = body->content->createShared();
+    
+    auto it = endpointInfo.consumes.begin();
+    while (it != endpointInfo.consumes.end()) {
+      
+      auto mediaType = MediaTypeObject::createShared();
+      mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedSchemas);
+      
+      body->content->put(it->contentType, mediaType);
+      
+      it++;
+    }
+    
+    return body;
+    
+  } else {
+  
+    if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
+      
+      auto body = RequestBody::createShared();
+      body->description = "request body";
+      
+      auto mediaType = MediaTypeObject::createShared();
+      mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedSchemas);
+      
+      body->content = body->content->createShared();
+      if(endpointInfo.bodyContentType != nullptr) {
+        body->content->put(endpointInfo.bodyContentType, mediaType);
+      } else {
+        if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME) {
+          body->content->put("application/json", mediaType);
+        } else if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME) {
+          body->content->put("application/json", mediaType);
+        } else if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME) {
+          body->content->put("application/json", mediaType);
+        } else {
+          body->content->put("text/plain", mediaType);
+        }
+      }
+      
+      return body;
+      
+    }
+    
+  }
+  
+  return nullptr;
+  
+}
+  
+Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas) {
+  
+  auto responses = Fields<OperationResponse::ObjectWrapper>::createShared();
+  
+  if(endpointInfo.responses.size() > 0) {
+    
+    auto it = endpointInfo.responses.begin();
+    while (it != endpointInfo.responses.end()) {
+      
+      auto mediaType = MediaTypeObject::createShared();
+      mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedSchemas);
+      
+      auto response = OperationResponse::createShared();
+      response->description = it->first.description;
+      response->content = response->content->createShared();
+      response->content->put(it->second.contentType, mediaType);
+      responses->put(oatpp::utils::conversion::int32ToStr(it->first.code), response);
+      
+      it++;
+    }
+    
+  } else {
+  
+    auto mediaType = MediaTypeObject::createShared();
+    mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedSchemas);
+  
+    auto response = OperationResponse::createShared();
+    response->description = "success";
+    response->content = response->content->createShared();
+    response->content->put("test/plain", mediaType);
+    responses->put("200", response);
+  
+  }
+  
+  return responses;
+    
+}
+  
+void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedSchemas& usedSchemas) {
   
   auto info = endpoint->info;
   
@@ -105,6 +210,8 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     
     auto operation = PathItemOperation::createShared();
     operation->operationId = info->name;
+    operation->summary = info->summary;
+    operation->description = info->description;
     
     if(oatpp::base::StrBuffer::equalsCI("get", info->method->c_str(), info->method->getSize())) {
       pathItem->operationGet = operation;
@@ -124,34 +231,8 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       pathItem->operationTrace = operation;
     }
     
-    if(!operation->responses) {
-      
-      operation->responses = operation->responses->createShared();
-      
-      auto mediaType = MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(oatpp::String::Class::getType());
-      
-      auto response = OperationResponse::createShared();
-      response->description = "success";
-      response->content = response->content->createShared();
-      response->content->put("test/plain", mediaType);
-      
-      operation->responses->put("200", response);
-      
-    }
-    
-    if(info->body.name != nullptr) {
-      
-      operation->requestBody = RequestBody::createShared();
-      operation->requestBody->description = "request body";
-      
-      auto mediaType = MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(info->body.type);
-      
-      operation->requestBody->content = operation->requestBody->content->createShared();
-      operation->requestBody->content->put("application/json", mediaType);
-      
-    }
+    operation->responses = generateResponses(*info, true, usedSchemas);
+    operation->requestBody = generateRequestBody(*info, true, usedSchemas);
     
     if(!pathItem->parameters) {
       
@@ -163,7 +244,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         auto parameter = PathItemParameter::createShared();
         parameter->in = "header";
         parameter->name = param.name;
-        parameter->schema = generateSchemaForType(param.type);
+        parameter->schema = generateSchemaForType(param.type, true, usedSchemas);
         pathItem->parameters->pushBack(parameter);
       }
       
@@ -173,7 +254,8 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         auto parameter = PathItemParameter::createShared();
         parameter->in = "path";
         parameter->name = param.name;
-        parameter->schema = generateSchemaForType(param.type);
+        parameter->required = true;
+        parameter->schema = generateSchemaForType(param.type, true, usedSchemas);
         pathItem->parameters->pushBack(parameter);
       }
       
@@ -183,7 +265,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   
 }
   
-Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints) {
+Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedSchemas& usedSchemas) {
   
   auto result = Paths::createShared();
   
@@ -204,13 +286,43 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
         pathItem = PathItem::createShared();
         result->put(path, pathItem);
       }
-      generatePathItemData(endpoint, pathItem);
+      generatePathItemData(endpoint, pathItem, usedSchemas);
     }
     
     curr = curr->getNext();
   }
   
   return result;
+  
+}
+  
+Components::ObjectWrapper Generator::generateComponents(const UsedSchemas& usedSchemas) {
+  
+  auto result = Components::createShared();
+  result->schemas = result->schemas->createShared();
+  
+  auto it = usedSchemas.begin();
+  while (it != usedSchemas.end()) {
+    UsedSchemas schemas; ///< dummy
+    result->schemas->put(it->first, generateSchemaForType(it->second, false, schemas));
+    it ++;
+  }
+  
+  return result;
+  
+}
+  
+Document::ObjectWrapper Generator::generateDocument(const Info::ObjectWrapper& info, const std::shared_ptr<Endpoints>& endpoints) {
+  
+  auto document = oas3::Document::createShared();
+  document->info = info;
+  
+  UsedSchemas usedSchemas;
+  document->paths = generatePaths(endpoints, usedSchemas);
+  
+  document->components = generateComponents(usedSchemas);
+  
+  return document;
   
 }
   
