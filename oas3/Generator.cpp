@@ -102,6 +102,13 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
     return generateSchemaForTypeList(type, linkSchema, usedSchemas);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
     // TODO
+  } else {
+    auto result = Schema::createShared();
+    result->type = type->name;
+    if(type->nameQualifier) {
+      result->format = type->nameQualifier;
+    }
+    return result;
   }
   
   return Schema::createShared();
