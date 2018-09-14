@@ -251,6 +251,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         auto parameter = PathItemParameter::createShared();
         parameter->in = "header";
         parameter->name = param.name;
+        parameter->required = true;
         parameter->schema = generateSchemaForType(param.type, true, usedTypes);
         pathItem->parameters->pushBack(parameter);
       }
