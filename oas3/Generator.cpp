@@ -28,13 +28,13 @@
 
 namespace oatpp { namespace swagger { namespace oas3 {
  
-Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
+Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
   
   auto result = Schema::createShared();
   if(linkSchema) {
   
     result->ref = oatpp::String("#/components/schemas/") + type->nameQualifier;
-    usedSchemas[type->nameQualifier] = type;
+    usedTypes[type->nameQualifier] = type;
     return result;
   
   } else {
@@ -50,7 +50,7 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::
     auto it = properties->getList().begin();
     while (it != properties->getList().end()) {
       auto p = *it ++;
-      result->properties->put(p->name, generateSchemaForType(p->type, linkSchema, usedSchemas));
+      result->properties->put(p->name, generateSchemaForType(p->type, true, usedTypes));
     }
     
     return result;
@@ -58,14 +58,14 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::
   
 }
   
-Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
+Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
   auto result = Schema::createShared();
   result->type = "array";
-  result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedSchemas);
+  result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedTypes);
   return result;
 }
   
-Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas) {
+Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
   
   auto typeName = type->name;
   if(typeName == oatpp::data::mapping::type::__class::String::CLASS_NAME){
@@ -97,9 +97,9 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
     result->type = "boolean";
     return result;
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
-    return generateSchemaForTypeObject(type, linkSchema, usedSchemas);
+    return generateSchemaForTypeObject(type, linkSchema, usedTypes);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
-    return generateSchemaForTypeList(type, linkSchema, usedSchemas);
+    return generateSchemaForTypeList(type, linkSchema, usedTypes);
   } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
     // TODO
   } else {
@@ -115,7 +115,7 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
   
 }
   
-RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas) {
+RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
   if(endpointInfo.consumes.size() > 0) {
     
@@ -127,7 +127,7 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
     while (it != endpointInfo.consumes.end()) {
       
       auto mediaType = MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedSchemas);
+      mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedTypes);
       
       body->content->put(it->contentType, mediaType);
       
@@ -144,7 +144,7 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
       body->description = "request body";
       
       auto mediaType = MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedSchemas);
+      mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
       
       body->content = body->content->createShared();
       if(endpointInfo.bodyContentType != nullptr) {
@@ -171,7 +171,7 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
   
 }
   
-Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas) {
+Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
   auto responses = Fields<OperationResponse::ObjectWrapper>::createShared();
   
@@ -181,7 +181,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
     while (it != endpointInfo.responses.end()) {
       
       auto mediaType = MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedSchemas);
+      mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedTypes);
       
       auto response = OperationResponse::createShared();
       response->description = it->first.description;
@@ -195,7 +195,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
   } else {
   
     auto mediaType = MediaTypeObject::createShared();
-    mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedSchemas);
+    mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedTypes);
   
     auto response = OperationResponse::createShared();
     response->description = "success";
@@ -209,7 +209,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
     
 }
   
-void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedSchemas& usedSchemas) {
+void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes) {
   
   auto info = endpoint->info;
   
@@ -238,8 +238,8 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       pathItem->operationTrace = operation;
     }
     
-    operation->responses = generateResponses(*info, true, usedSchemas);
-    operation->requestBody = generateRequestBody(*info, true, usedSchemas);
+    operation->responses = generateResponses(*info, true, usedTypes);
+    operation->requestBody = generateRequestBody(*info, true, usedTypes);
     
     if(!pathItem->parameters) {
       
@@ -251,7 +251,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         auto parameter = PathItemParameter::createShared();
         parameter->in = "header";
         parameter->name = param.name;
-        parameter->schema = generateSchemaForType(param.type, true, usedSchemas);
+        parameter->schema = generateSchemaForType(param.type, true, usedTypes);
         pathItem->parameters->pushBack(parameter);
       }
       
@@ -262,7 +262,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         parameter->in = "path";
         parameter->name = param.name;
         parameter->required = true;
-        parameter->schema = generateSchemaForType(param.type, true, usedSchemas);
+        parameter->schema = generateSchemaForType(param.type, true, usedTypes);
         pathItem->parameters->pushBack(parameter);
       }
       
@@ -272,7 +272,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   
 }
   
-Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedSchemas& usedSchemas) {
+Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes) {
   
   auto result = Paths::createShared();
   
@@ -293,7 +293,7 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
         pathItem = PathItem::createShared();
         result->put(path, pathItem);
       }
-      generatePathItemData(endpoint, pathItem, usedSchemas);
+      generatePathItemData(endpoint, pathItem, usedTypes);
     }
     
     curr = curr->getNext();
@@ -303,14 +303,69 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
   
 }
   
-Components::ObjectWrapper Generator::generateComponents(const UsedSchemas& usedSchemas) {
+void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  
+  auto schemaIt = decomposedTypes.find(type->nameQualifier);
+  if(schemaIt != decomposedTypes.end()) {
+    return;
+  }
+  
+  decomposedTypes[type->nameQualifier] = type;
+  
+  auto properties = type->properties;
+  if(properties->getList().size() == 0) {
+    type->creator(); // init type by creating first instance of that type
+  }
+  
+  auto it = properties->getList().begin();
+  while (it != properties->getList().end()) {
+    auto p = *it ++;
+    decomposeType(p->type, decomposedTypes);
+  }
+}
+
+void Generator::decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  decomposeType(*type->params.begin(), decomposedTypes);
+}
+
+void Generator::decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  // TODO
+}
+  
+void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  auto typeName = type->name;
+  if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
+    decomposeObject(type, decomposedTypes);
+  } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
+    decomposeList(type, decomposedTypes);
+  } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
+    decomposeMap(type, decomposedTypes);
+  }
+}
+  
+Generator::UsedTypes Generator::decomposeTypes(UsedTypes& usedTypes) {
+  
+  UsedTypes result; // decomposed schemas
+  
+  auto it = usedTypes.begin();
+  while (it != usedTypes.end()) {
+    decomposeType(it->second, result);
+    result[it->first] = it->second;
+    it ++;
+  }
+  
+  return result;
+  
+}
+  
+Components::ObjectWrapper Generator::generateComponents(const UsedTypes& decomposedTypes) {
   
   auto result = Components::createShared();
   result->schemas = result->schemas->createShared();
   
-  auto it = usedSchemas.begin();
-  while (it != usedSchemas.end()) {
-    UsedSchemas schemas; ///< dummy
+  auto it = decomposedTypes.begin();
+  while (it != decomposedTypes.end()) {
+    UsedTypes schemas; ///< dummy
     result->schemas->put(it->first, generateSchemaForType(it->second, false, schemas));
     it ++;
   }
@@ -335,10 +390,10 @@ Document::ObjectWrapper Generator::generateDocument(const std::shared_ptr<oatpp:
     
   }
   
-  UsedSchemas usedSchemas;
-  document->paths = generatePaths(endpoints, usedSchemas);
-  
-  document->components = generateComponents(usedSchemas);
+  UsedTypes usedTypes;
+  document->paths = generatePaths(endpoints, usedTypes);
+  auto decomposedTypes = decomposeTypes(usedTypes);
+  document->components = generateComponents(decomposedTypes);
   
   return document;
   

@@ -44,24 +44,30 @@ public:
   
   typedef Fields<PathItem::ObjectWrapper> Paths;
   
-  typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedSchemas;
+  typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
   
 public:
   
-  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
-  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
-  static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedSchemas& usedSchemas);
+  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
 
-  static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas);
-  static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedSchemas& usedSchemas);
-  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedSchemas& usedSchemas);
+  static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes);
   
   /**
-   *  UsedSchemas& usedSchemas is used to put Types of objects whos schema should be reused
+   *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedSchemas& usedSchemas);
+  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes);
   
-  static Components::ObjectWrapper generateComponents(const UsedSchemas& usedSchemas);
+  static void decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
+  static void decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
+  static void decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
+  static void decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
+  static UsedTypes decomposeTypes(UsedTypes& usedTypes);
+  
+  static Components::ObjectWrapper generateComponents(const UsedTypes& decomposedTypes);
   
   static Document::ObjectWrapper generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
   
