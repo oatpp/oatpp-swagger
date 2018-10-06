@@ -200,7 +200,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
     auto response = OperationResponse::createShared();
     response->description = "success";
     response->content = response->content->createShared();
-    response->content->put("test/plain", mediaType);
+    response->content->put("text/plain", mediaType);
     responses->put("200", response);
   
   }
