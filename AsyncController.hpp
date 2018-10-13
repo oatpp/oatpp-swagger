@@ -68,7 +68,7 @@ public:
     
     auto document = oas3::Generator::generateDocument(documentInfo, endpointsList);
     
-    return std::shared_ptr<AsyncController>(new AsyncController(objectMapper, document, resources));
+    return std::make_shared<AsyncController>(objectMapper, document, resources);
   }
   
 #include OATPP_CODEGEN_BEGIN(ApiController)

@@ -41,7 +41,7 @@ class Controller : public oatpp::web::server::api::ApiController {
 private:
   oas3::Document::ObjectWrapper m_document;
   std::shared_ptr<oatpp::swagger::Resources> m_resources;
-protected:
+public:
   Controller(const std::shared_ptr<ObjectMapper>& objectMapper,
              const oas3::Document::ObjectWrapper& document,
              const std::shared_ptr<oatpp::swagger::Resources>& resources)
@@ -65,7 +65,7 @@ public:
     
     auto document = oas3::Generator::generateDocument(documentInfo, endpointsList);
     
-    return std::shared_ptr<Controller>(new Controller(objectMapper, document, resources));
+    return std::make_shared<Controller>(objectMapper, document, resources);
   }
   
 #include OATPP_CODEGEN_BEGIN(ApiController)
