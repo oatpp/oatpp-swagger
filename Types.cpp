@@ -22,31 +22,12 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_swagger_Types_hpp
-#define oatpp_swagger_Types_hpp
-
-#include "oatpp/core/data/mapping/type/Type.hpp"
-#include "oatpp/core/Types.hpp"
+#include "Types.hpp"
 
 namespace oatpp { namespace swagger {
   
 namespace __class {
-    
-  class Binary {
-  public:
-    static const char* const CLASS_NAME;
-    
-    static oatpp::data::mapping::type::Type* getType(){
-      static oatpp::data::mapping::type::Type type(CLASS_NAME, "binary");
-      return &type;
-    }
-    
-  };
-  
+  const char* const Binary::CLASS_NAME = "string";
 }
   
-typedef oatpp::data::mapping::type::ObjectWrapper<oatpp::base::StrBuffer, __class::Binary> Binary;
-  
 }}
-
-#endif /* oatpp_swagger_Types_hpp */
