@@ -18,6 +18,8 @@ endif()
 
 target_include_directories(${OATPP_THIS_MODULE_NAME}
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        PUBLIC ${OATPP_DIR_SRC}/src
 )
 
 target_link_directories(${OATPP_THIS_MODULE_NAME}
