@@ -17,7 +17,9 @@ if(MODULE_WAIT_DEPS)
 endif()
 
 target_include_directories(${OATPP_THIS_MODULE_NAME}
+        PUBLIC $<BUILD_INTERFACE:${OATPP_DIR_SRC}/src>
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 target_link_directories(${OATPP_THIS_MODULE_NAME}
@@ -28,3 +30,10 @@ target_link_libraries(${OATPP_THIS_MODULE_NAME}
         PRIVATE oatpp
         PRIVATE oatpp-test
 )
+
+#######################################################################################################
+## INSTALL TARGETS
+
+if(OATPP_INSTALL)
+    include("oatpp-module-install.cmake")
+endif()

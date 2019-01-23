@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-set(OATPP_THIS_MODULE_NAME oatpp-swagger)
+###################################################################################################
+## These variables are passed to oatpp-module-install.cmake script
+## use these variables to configure module installation
+
+set(OATPP_THIS_MODULE_NAME oatpp-swagger) ## name of the module (also name of folders in installation dirs)
+set(OATPP_THIS_MODULE_VERSION "0.19.1") ## version of the module (also sufix of folders in installation dirs)
+set(OATPP_THIS_MODULE_LIBRARIES oatpp-swagger) ## list of libraries to find when find_package is called
+set(OATPP_THIS_MODULE_TARGETS oatpp-swagger) ## list of targets to install
+set(OATPP_THIS_MODULE_DIRECTORIES oatpp-swagger) ## list of directories to install
+
+###################################################################################################
 
 project(${OATPP_THIS_MODULE_NAME})
 
@@ -10,6 +20,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(OATPP_DIR_SRC "Path to oatpp module directory (sources)")
 option(OATPP_DIR_LIB "Path to directory with liboatpp (directory containing ex: liboatpp.so or liboatpp.dynlib)")
 option(OATPP_BUILD_TESTS "Build tests for this module" ON)
+option(OATPP_INSTALL "Install module binaries" ON)
 
 message("OATPP_MODULE='${OATPP_THIS_MODULE_NAME}'")
 
