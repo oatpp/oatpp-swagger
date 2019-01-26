@@ -9,6 +9,12 @@ jobs:
     continueOnError: false
     pool:
       vmImage: 'Ubuntu 16.04'
+    strategy:
+      matrix:
+        ubuntu18:
+          containerImage: ubuntu:18.04
+          
+    container: $[ variables['containerImage'] ]
     workspace:
       clean: all
     steps:
