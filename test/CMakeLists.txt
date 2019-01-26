@@ -1,6 +1,6 @@
 add_executable(module-tests
         oatpp-swagger/tests.cpp
-        )
+)
 
 set_target_properties(module-tests PROPERTIES
         CXX_STANDARD 11
@@ -12,20 +12,18 @@ target_include_directories(module-tests
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-if(MODULE_WAIT_DEPS)
-    add_dependencies(module-tests ${LIB_oatpp})
+if(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_EXTERNAL)
+    add_dependencies(module-tests ${LIB_OATPP_EXTERNAL})
 endif()
 
 add_dependencies(module-tests ${OATPP_THIS_MODULE_NAME})
 
-target_link_directories(module-tests
-        PRIVATE ${OATPP_DIR_LIB}/src
-)
+target_link_oatpp(module-tests)
 
 target_link_libraries(module-tests
-        PRIVATE oatpp
-        PRIVATE oatpp-test
         PRIVATE ${OATPP_THIS_MODULE_NAME}
 )
+
+## TODO link dependencies here (if some)
 
 add_test(module-tests module-tests)
