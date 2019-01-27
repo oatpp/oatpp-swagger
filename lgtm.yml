@@ -14,3 +14,6 @@ path_classifiers:
     - LICENSE.txt
 extraction:
   cpp:
+    configure:
+      command:
+        - cmake -DOATPP_MODULES_LOCATION=EXTERNAL .
