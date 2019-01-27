@@ -1,4 +1,4 @@
-# oatpp-swagger
+# oatpp-swagger [![oatpp build status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.oatpp-swagger)](https://dev.azure.com/lganzzzo/lganzzzo/_build?definitionId=2)
 Swagger UI for oatpp services
 
 More about oatpp see [https://oatpp.io/](https://oatpp.io/)  
