@@ -55,7 +55,7 @@ elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_EXTERNAL)
     set(LIB_OATPP_EXTERNAL "lib_oatpp_external")
     ExternalProject_Add(${LIB_OATPP_EXTERNAL}
             GIT_REPOSITORY "https://github.com/oatpp/oatpp.git"
-            GIT_TAG origin/new_module_structure
+            GIT_TAG origin/master
             CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DOATPP_INSTALL=OFF -DOATPP_BUILD_TESTS=OFF
             INSTALL_COMMAND cmake -E echo "SKIP INSTALL '${LIB_OATPP_EXTERNAL}'"
     )
