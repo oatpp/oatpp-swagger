@@ -5,12 +5,12 @@
 
 jobs:
   - job: ubuntu_16_04
-      displayName: 'Build - Ubuntu 16.04'
-      continueOnError: false
-      pool:
-        vmImage: 'Ubuntu 16.04'
-      workspace:
-        clean: all
+    displayName: 'Build - Ubuntu 16.04'
+    continueOnError: false
+    pool:
+      vmImage: 'Ubuntu 16.04'
+    workspace:
+      clean: all
     steps:
       - script: |
           mkdir build
@@ -24,7 +24,7 @@ jobs:
           make test ARGS="-V"
         displayName: 'Test'
         workingDirectory: build
-        
+
   - job: macOS
     displayName: 'Build - macOS-10.13'
     continueOnError: false
