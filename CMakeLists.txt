@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 ###################################################################################################
 ## These variables are passed to oatpp-module-install.cmake script
@@ -80,6 +80,10 @@ elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_CUSTOM)
 
 else()
     message("FATAL_ERROR Unknown location to find oatpp '${OATPP_MODULES_LOCATION}'")
+endif()
+
+if(OATPP_DIR_LIB)
+    link_directories(${OATPP_DIR_LIB})
 endif()
 
 ###################################################################################################
