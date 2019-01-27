@@ -4,26 +4,6 @@
 # https://aka.ms/yaml
 
 jobs:
-  - job: ubuntu_16_04
-    displayName: 'Build - Ubuntu 16.04'
-    continueOnError: false
-    pool:
-      vmImage: 'Ubuntu 16.04'
-    workspace:
-      clean: all
-    steps:
-      - script: |
-          mkdir build
-      - task: CMake@1
-      - script: |
-          cmake -DOATPP_MODULES_LOCATION=EXTERNAL ..
-          make
-        displayName: 'CMake'
-        workingDirectory: build
-      - script: |
-          make test ARGS="-V"
-        displayName: 'Test'
-        workingDirectory: build
   - job: macOS
     displayName: 'Build - macOS-10.13'
     continueOnError: false
