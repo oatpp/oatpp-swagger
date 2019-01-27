@@ -15,8 +15,6 @@ set(OATPP_THIS_MODULE_DIRECTORIES oatpp-swagger) ## list of directories to insta
 project(${OATPP_THIS_MODULE_NAME}
         VERSION ${OATPP_THIS_MODULE_VERSION}
         LANGUAGES CXX
-        HOMEPAGE_URL "https://github.com/oatpp/oatpp-swagger"
-        DESCRIPTION "Swagger UI for oatpp services"
 )
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
