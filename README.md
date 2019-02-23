@@ -6,7 +6,7 @@ More about Swagger UI see [https://swagger.io/tools/swagger-ui/](https://swagger
 
 ## Example
 
-For full example project see: [Example CRUD-API project with Swagger UI](https://github.com/oatpp/oatpp-examples/tree/master/crud)
+For full example project see: [Example CRUD-API project with Swagger UI](https://github.com/oatpp/example-crud)
 
 ## Brief
 
