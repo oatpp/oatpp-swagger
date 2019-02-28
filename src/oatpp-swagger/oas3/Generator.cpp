@@ -114,7 +114,28 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
   return Schema::createShared();
   
 }
-  
+
+void Generator::addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
+                                          Endpoint::Info::Params& params,
+                                          const oatpp::String& inType,
+                                          UsedTypes& usedTypes)
+{
+
+  auto it = params.getOrder().begin();
+  while (it != params.getOrder().end()) {
+    auto param = params[*it++];
+    auto parameter = PathItemParameter::createShared();
+    parameter->in = inType;
+    parameter->name = param.name;
+    parameter->description = param.description;
+    parameter->required = param.required;
+    parameter->deprecated = param.deprecated;
+    parameter->schema = generateSchemaForType(param.type, true, usedTypes);
+    paramsList->pushBack(parameter);
+  }
+
+}
+
 RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
   if(endpointInfo.consumes.size() > 0) {
@@ -244,28 +265,10 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     if(!pathItem->parameters) {
       
       pathItem->parameters = pathItem->parameters->createShared();
-      
-      auto headerIt = info->headers.begin();
-      while (headerIt != info->headers.end()) {
-        auto param = *headerIt++;
-        auto parameter = PathItemParameter::createShared();
-        parameter->in = "header";
-        parameter->name = param.name;
-        parameter->required = true;
-        parameter->schema = generateSchemaForType(param.type, true, usedTypes);
-        pathItem->parameters->pushBack(parameter);
-      }
-      
-      auto pathIt = info->pathParams.begin();
-      while (pathIt != info->pathParams.end()) {
-        auto param = *pathIt++;
-        auto parameter = PathItemParameter::createShared();
-        parameter->in = "path";
-        parameter->name = param.name;
-        parameter->required = true;
-        parameter->schema = generateSchemaForType(param.type, true, usedTypes);
-        pathItem->parameters->pushBack(parameter);
-      }
+
+      addParamsToParametersList(pathItem->parameters, info->headers, "header", usedTypes);
+      addParamsToParametersList(pathItem->parameters, info->pathParams, "path", usedTypes);
+      addParamsToParametersList(pathItem->parameters, info->queryParams, "query", usedTypes);
       
     }
     

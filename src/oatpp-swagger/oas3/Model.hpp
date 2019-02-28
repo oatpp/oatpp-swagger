@@ -228,8 +228,10 @@ class PathItemParameter : public oatpp::data::mapping::type::Object {
   DTO_INIT(PathItemParameter, Object)
   
   DTO_FIELD(String, name);
+  DTO_FIELD(String, description);
   DTO_FIELD(String, in); // "query", "header", "path"
   DTO_FIELD(Boolean, required);
+  DTO_FIELD(Boolean, deprecated);
   DTO_FIELD(Schema::ObjectWrapper, schema);
   
 };
