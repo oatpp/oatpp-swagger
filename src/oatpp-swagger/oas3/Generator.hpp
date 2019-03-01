@@ -38,6 +38,8 @@ class Generator {
 public:
   typedef oatpp::web::server::api::Endpoint Endpoint;
   typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
+
+  typedef oatpp::data::mapping::type::List<PathItemParameter::ObjectWrapper> PathItemParameters;
   
   template <class Value>
   using Fields = oatpp::data::mapping::type::ListMap<String, Value>;
@@ -45,9 +47,14 @@ public:
   typedef Fields<PathItem::ObjectWrapper> Paths;
   
   typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
-  
+
+private:
+  static void addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
+                                        Endpoint::Info::Params& params,
+                                        const oatpp::String& inType,
+                                        UsedTypes& usedTypes);
 public:
-  
+
   static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
   static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
   static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);

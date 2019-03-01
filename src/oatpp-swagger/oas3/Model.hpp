@@ -210,28 +210,31 @@ class RequestBody : public oatpp::data::mapping::type::Object {
   
 };
   
+class PathItemParameter : public oatpp::data::mapping::type::Object {
+  
+  DTO_INIT(PathItemParameter, Object)
+  
+  DTO_FIELD(String, name);
+  DTO_FIELD(String, description);
+  DTO_FIELD(String, in); // "query", "header", "path"
+  DTO_FIELD(Boolean, required);
+  DTO_FIELD(Boolean, deprecated);
+  DTO_FIELD(Schema::ObjectWrapper, schema);
+  
+};
+
 class PathItemOperation : public oatpp::data::mapping::type::Object {
-  
+
   DTO_INIT(PathItemOperation, Object)
-  
+
   DTO_FIELD(String, description);
   DTO_FIELD(String, summary);
   DTO_FIELD(String, operationId);
   DTO_FIELD(RequestBody::ObjectWrapper, requestBody);
   DTO_FIELD(List<String>::ObjectWrapper, tags);
   DTO_FIELD(Fields<OperationResponse::ObjectWrapper>::ObjectWrapper, responses);
-  
-};
-  
-class PathItemParameter : public oatpp::data::mapping::type::Object {
-  
-  DTO_INIT(PathItemParameter, Object)
-  
-  DTO_FIELD(String, name);
-  DTO_FIELD(String, in); // "query", "header", "path"
-  DTO_FIELD(Boolean, required);
-  DTO_FIELD(Schema::ObjectWrapper, schema);
-  
+  DTO_FIELD(List<PathItemParameter::ObjectWrapper>::ObjectWrapper, parameters);
+
 };
   
 class PathItem : public oatpp::data::mapping::type::Object {
@@ -246,8 +249,7 @@ class PathItem : public oatpp::data::mapping::type::Object {
   DTO_FIELD(PathItemOperation::ObjectWrapper, operationHead, "head");
   DTO_FIELD(PathItemOperation::ObjectWrapper, operationPatch, "patch");
   DTO_FIELD(PathItemOperation::ObjectWrapper, operationTrace, "trace");
-  
-  DTO_FIELD(List<PathItemParameter::ObjectWrapper>::ObjectWrapper, parameters);
+  //DTO_FIELD(List<PathItemParameter::ObjectWrapper>::ObjectWrapper, parameters);
   
 };
   

@@ -1,5 +1,11 @@
+## define path to swagger-ui res folder
+
+add_definitions(-DOATPP_SWAGGER_RES_PATH="${CMAKE_CURRENT_LIST_DIR}/../res")
+
 add_executable(module-tests
         oatpp-swagger/tests.cpp
+        oatpp-swagger/Logger.hpp
+        oatpp-swagger/TestController.hpp
 )
 
 set_target_properties(module-tests PROPERTIES
