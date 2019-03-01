@@ -76,7 +76,9 @@ public:
 
     std::cout << stream->toString()->c_str() << "\n\n";
 
-    oatpp::parser::Caret caret(stream->toString());
+    auto responseText = stream->toString();
+
+    oatpp::parser::Caret caret(responseText);
     caret.findChar('{');
 
     auto document = objectMapper->readFromCaret<oatpp::swagger::oas3::Document>(caret);
