@@ -29,7 +29,9 @@
 namespace oatpp { namespace swagger { namespace oas3 {
  
 Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
-  
+
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
+
   auto result = Schema::createShared();
   if(linkSchema) {
   
@@ -59,6 +61,9 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::
 }
   
 Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
+
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeList()]: Error. Type should not be null.");
+
   auto result = Schema::createShared();
   result->type = "array";
   result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedTypes);
@@ -66,7 +71,9 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::ma
 }
   
 Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
-  
+
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
+
   auto typeName = type->name;
   if(typeName == oatpp::data::mapping::type::__class::String::CLASS_NAME){
     auto result = Schema::createShared();
@@ -171,6 +178,9 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
       if(endpointInfo.bodyContentType != nullptr) {
         body->content->put(endpointInfo.bodyContentType, mediaType);
       } else {
+
+        OATPP_ASSERT(endpointInfo.body.type && "[oatpp-swagger::oas3::Generator::generateRequestBody()]: Error. Type should not be null.");
+
         if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME) {
           body->content->put("application/json", mediaType);
         } else if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME) {
@@ -261,15 +271,15 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     
     operation->responses = generateResponses(*info, true, usedTypes);
     operation->requestBody = generateRequestBody(*info, true, usedTypes);
-    
-    if(!pathItem->parameters) {
-      
-      pathItem->parameters = pathItem->parameters->createShared();
 
-      addParamsToParametersList(pathItem->parameters, info->headers, "header", usedTypes);
-      addParamsToParametersList(pathItem->parameters, info->pathParams, "path", usedTypes);
-      addParamsToParametersList(pathItem->parameters, info->queryParams, "query", usedTypes);
-      
+    if(!operation->parameters) {
+
+      operation->parameters = operation->parameters->createShared();
+
+      addParamsToParametersList(operation->parameters, info->headers, "header", usedTypes);
+      addParamsToParametersList(operation->parameters, info->pathParams, "path", usedTypes);
+      addParamsToParametersList(operation->parameters, info->queryParams, "query", usedTypes);
+
     }
     
   }
@@ -292,11 +302,13 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
       if(path->getData()[0] != '/') {
         path = "/" + path;
       }
+
       auto pathItem = result->get(path, nullptr);
       if(!pathItem) {
         pathItem = PathItem::createShared();
         result->put(path, pathItem);
       }
+
       generatePathItemData(endpoint, pathItem, usedTypes);
     }
     
@@ -308,7 +320,9 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
 }
   
 void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
-  
+
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeObject()]: Error. Type should not be null.");
+
   auto schemaIt = decomposedTypes.find(type->nameQualifier);
   if(schemaIt != decomposedTypes.end()) {
     return;
@@ -329,6 +343,7 @@ void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, Us
 }
 
 void Generator::decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeList()]: Error. Type should not be null.");
   decomposeType(*type->params.begin(), decomposedTypes);
 }
 
@@ -337,6 +352,7 @@ void Generator::decomposeMap(const oatpp::data::mapping::type::Type* type, UsedT
 }
   
 void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeType()]: Error. Type should not be null.");
   auto typeName = type->name;
   if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
     decomposeObject(type, decomposedTypes);
