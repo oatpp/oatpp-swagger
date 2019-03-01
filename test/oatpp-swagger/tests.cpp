@@ -81,6 +81,9 @@ public:
 
     auto document = objectMapper->readFromCaret<oatpp::swagger::oas3::Document>(caret);
 
+    if(caret.hasError()) {
+      OATPP_LOGD(TAG, "error='%s', pos=%d", caret.getErrorMessage(), caret.getPosition());
+    }
     OATPP_ASSERT(caret.hasError() == false);
 
     // TODO test generated document here
