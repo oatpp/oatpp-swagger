@@ -29,7 +29,6 @@
 #include "oatpp-swagger/oas3/Generator.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/web/server/HttpError.hpp"
 
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
@@ -44,7 +43,7 @@ public:
 public:
   oas3::Document::ObjectWrapper m_document;
   std::shared_ptr<oatpp::swagger::Resources> m_resources;
-protected:
+public:
   AsyncController(const std::shared_ptr<ObjectMapper>& objectMapper,
              const oas3::Document::ObjectWrapper& document,
              const std::shared_ptr<oatpp::swagger::Resources>& resources)
@@ -73,9 +72,9 @@ public:
   
 #include OATPP_CODEGEN_BEGIN(ApiController)
   
-  ENDPOINT_ASYNC("GET", "/api-docs/oas-3.0.0.json", ApiDocs) {
+  ENDPOINT_ASYNC("GET", "/api-docs/oas-3.0.0.json", Api) {
     
-    ENDPOINT_ASYNC_INIT(ApiDocs)
+    ENDPOINT_ASYNC_INIT(Api)
     
     Action act() override {
       return _return(controller->createDtoResponse(Status::CODE_200, controller->m_document));

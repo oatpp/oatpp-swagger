@@ -5,7 +5,12 @@ add_definitions(-DOATPP_SWAGGER_RES_PATH="${CMAKE_CURRENT_LIST_DIR}/../res")
 add_executable(module-tests
         oatpp-swagger/tests.cpp
         oatpp-swagger/Logger.hpp
-        oatpp-swagger/TestController.hpp
+        oatpp-swagger/test-controllers/TestController.hpp
+        oatpp-swagger/test-controllers/TestAsyncController.hpp
+        oatpp-swagger/ControllerTest.cpp
+        oatpp-swagger/ControllerTest.hpp
+        oatpp-swagger/AsyncControllerTest.cpp
+        oatpp-swagger/AsyncControllerTest.hpp
 )
 
 set_target_properties(module-tests PROPERTIES
