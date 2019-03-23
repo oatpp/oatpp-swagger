@@ -30,7 +30,10 @@
 #include <unordered_map>
 
 namespace oatpp { namespace swagger {
-  
+
+/**
+ * This class is responsible for loading Swagger-UI resources.
+ */
 class Resources {
 private:
   oatpp::String m_resDir;
@@ -39,9 +42,18 @@ private:
   oatpp::String loadFromFile(const char* fileName);
   void cacheResource(const char* fileName);
 public:
+  /**
+   * Constructor.
+   * @param resDir - directory containing swagger-ui resources.
+   */
   Resources(const oatpp::String& resDir);
 public:
-  
+
+  /**
+   * Load and cache Swagger-UI resources.
+   * @param resDir - directory containing swagger-ui resources.
+   * @return - `std::shared_ptr` to Resources.
+   */
   static std::shared_ptr<Resources> loadResources(const oatpp::String& resDir) {
     auto res = std::make_shared<Resources>(resDir);
     
@@ -60,7 +72,12 @@ public:
     
     return res;
   }
-  
+
+  /**
+   * Get cached resource by filename.
+   * @param filename - name of the resource file.
+   * @return - &id:oatpp::String; containing resource binary data.
+   */
   oatpp::String getResource(const oatpp::String& filename);
   
 };
