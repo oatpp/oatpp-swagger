@@ -36,7 +36,18 @@
 #include "oatpp/core/macro/component.hpp"
 
 namespace oatpp { namespace swagger {
-  
+
+/**
+ * Asynchronous Controller for Swagger-UI. Extends &id:oatpp::web::server::api::ApiController;. <br>
+ * Should be used with oatpp Async API and non-blocking I/O. <br>
+ * For more information about integrating swagger-ui in oatpp application see [oatpp-swagger module](/docs/modules/oatpp-swagger/). <br>
+ * Exposed endpoints:
+ * <ul>
+ *   <li>&id:ENDPOINT_ASYNC;("GET", "/api-docs/oas-3.0.0.json", Api) - Server Open API Specification.</li>
+ *   <li>&id:ENDPOINT_ASYNC;("GET", "/swagger/ui", GetUIRoot) - Server Swagger-UI. (index.html).</li>
+ *   <li>&id:ENDPOINT_ASYNC;("GET", "/swagger/{filename}", GetUIResource) - Serve Swagger-UI resources.</li>
+ * </ul>
+ */
 class AsyncController : public oatpp::web::server::api::ApiController {
 public:
   typedef AsyncController __ControllerType;
@@ -52,10 +63,17 @@ public:
     , m_resources(resources)
   {}
 public:
-  
+
+  /**
+   * Create shared AsyncController.
+   * @param endpointsList - &id:oatpp::web::server::api::ApiController::Endpoints;
+   * @param documentInfo - &id:oatpp::swagger::DocumentInfo;.
+   * @param resources - &id:oatpp::swagger::Resources;.
+   * @return - AsyncController.
+   */
   static std::shared_ptr<AsyncController> createShared(const std::shared_ptr<Endpoints>& endpointsList,
-                                                  OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, documentInfo),
-                                                  OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, resources)){
+                                                       OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, documentInfo),
+                                                       OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, resources)){
     
     auto serializerConfig = oatpp::parser::json::mapping::Serializer::Config::createShared();
     serializerConfig->includeNullFields = false;

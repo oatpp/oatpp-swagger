@@ -36,7 +36,18 @@
 #include "oatpp/core/macro/component.hpp"
 
 namespace oatpp { namespace swagger {
-  
+
+/**
+ * Controller for Swagger-UI. Extends &id:oatpp::web::server::api::ApiController;. <br>
+ * Should be used with oatpp Simple API and multithreaded server. <br>
+ * For more information about integrating swagger-ui in oatpp application see [oatpp-swagger module](/docs/modules/oatpp-swagger/). <br>
+ * Exposed endpoints:
+ * <ul>
+ *   <li>&id:ENDPOINT;("GET", "/api-docs/oas-3.0.0.json", api) - Server Open API Specification.</li>
+ *   <li>&id:ENDPOINT;("GET", "/swagger/ui", getUIRoot) - Server Swagger-UI. (index.html).</li>
+ *   <li>&id:ENDPOINT;("GET", "/swagger/{filename}", getUIResource) - Serve Swagger-UI resources.</li>
+ * </ul>
+ */
 class Controller : public oatpp::web::server::api::ApiController {
 private:
   oas3::Document::ObjectWrapper m_document;
@@ -50,7 +61,14 @@ public:
     , m_resources(resources)
   {}
 public:
-  
+
+  /**
+   * Create shared Controller.
+   * @param endpointsList - &id:oatpp::web::server::api::ApiController::Endpoints;
+   * @param documentInfo - &id:oatpp::swagger::DocumentInfo;.
+   * @param resources - &id:oatpp::swagger::Resources;.
+   * @return - Controller.
+   */
   static std::shared_ptr<Controller> createShared(const std::shared_ptr<Endpoints>& endpointsList,
                                                   OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, documentInfo),
                                                   OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, resources)){

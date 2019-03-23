@@ -33,10 +33,21 @@
 #include <unordered_map>
 
 namespace oatpp { namespace swagger { namespace oas3 {
-  
+
+/**
+ * Generator of Open Api Specification 3.0.0.
+ */
 class Generator {
 public:
+
+  /**
+   * Convenience typedef for &id:oatpp::web::server::api::Endpoint;.
+   */
   typedef oatpp::web::server::api::Endpoint Endpoint;
+
+  /**
+   * Convenience typedef for list of &l:Generator::Endpoint;.
+   */
   typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
 
   typedef oatpp::data::mapping::type::List<PathItemParameter::ObjectWrapper> PathItemParameters;
@@ -53,7 +64,7 @@ private:
                                         Endpoint::Info::Params& params,
                                         const oatpp::String& inType,
                                         UsedTypes& usedTypes);
-public:
+private:
 
   static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
   static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
@@ -63,7 +74,7 @@ public:
   static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes);
   
-  /**
+  /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
   static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes);
@@ -75,11 +86,17 @@ public:
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
   static Components::ObjectWrapper generateComponents(const UsedTypes& decomposedTypes);
-  
+
+public:
+
+  /**
+   * Generate Open Api Specification 3.0.0. from &l:Generator::Endpoints;.
+   * @param docInfo - &id:oatpp::swagger::DocumentInfo;.
+   * @param endpoints &l:Generator::Endpoints;.
+   * @return - &id:oatpp::swagger::oas3::Document;.
+   */
   static Document::ObjectWrapper generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
-  
-  
-  
+
 };
   
 }}}
