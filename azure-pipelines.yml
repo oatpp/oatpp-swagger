@@ -25,23 +25,23 @@ jobs:
         displayName: 'Test'
         workingDirectory: build
 
-  - job: macOS
-    displayName: 'Build - macOS-10.13'
-    continueOnError: false
-    pool:
-      vmImage: 'macOS-10.13'
-    workspace:
-      clean: all
-    steps:
-      - script: |
-          mkdir build
-      - task: CMake@1
-      - script: |
-          cmake -DOATPP_MODULES_LOCATION=EXTERNAL ..
-          make
-        displayName: 'CMake'
-        workingDirectory: build
-      - script: |
-          make test ARGS="-V"
-        displayName: 'Test'
-        workingDirectory: build
+#  - job: macOS
+#    displayName: 'Build - macOS-10.13'
+#    continueOnError: false
+#    pool:
+#      vmImage: 'macOS-10.13'
+#    workspace:
+#      clean: all
+#    steps:
+#      - script: |
+#          mkdir build
+#      - task: CMake@1
+#      - script: |
+#          cmake -DOATPP_MODULES_LOCATION=EXTERNAL ..
+#          make
+#        displayName: 'CMake'
+#        workingDirectory: build
+#      - script: |
+#          make test ARGS="-V"
+#        displayName: 'Test'
+#        workingDirectory: build
