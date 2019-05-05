@@ -1,8 +1,10 @@
 # oatpp-swagger [![oatpp build status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.oatpp-swagger)](https://dev.azure.com/lganzzzo/lganzzzo/_build?definitionId=2)
 Swagger UI for oatpp services
 
-More about oatpp see [https://oatpp.io/](https://oatpp.io/)  
-More about Swagger UI see [https://swagger.io/tools/swagger-ui/](https://swagger.io/tools/swagger-ui/)
+Read more:
+- [About oatpp](https://oatpp.io/)  
+- [What is Swagger UI](https://swagger.io/tools/swagger-ui/)
+- [Endpoint annotation and API documentation in oatpp](https://oatpp.io/docs/components/api-controller/#endpoint-annotation-and-api-documentation).
 
 ## Example
 
