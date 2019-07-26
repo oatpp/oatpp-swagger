@@ -71,14 +71,14 @@ void ControllerTest::onRun() {
   auto swaggerController = oatpp::swagger::Controller::createShared(docEndpoints);
 
   // Get api json from swaggerController
-  auto stream = oatpp::data::stream::ChunkedBuffer::createShared();
+  oatpp::data::stream::ChunkedBuffer stream;
 
   auto response = swaggerController->api();
-  response->send(stream);
+  response->send(&stream);
 
-  std::cout << stream->toString()->c_str() << "\n\n";
+  std::cout << stream.toString()->c_str() << "\n\n";
 
-  auto responseText = stream->toString();
+  auto responseText = stream.toString();
 
   oatpp::parser::Caret caret(responseText);
   caret.findChar('{');
