@@ -25,6 +25,12 @@ option(OATPP_INSTALL "Install module binaries" ON)
 
 set(OATPP_MODULES_LOCATION "INSTALLED" CACHE STRING "Location where to find oatpp modules. can be [INSTALLED|EXTERNAL|CUSTOM]")
 
+if (MSVC)
+    # Add compilerswitch to allow pointer-to-members
+    # https://docs.microsoft.com/en-us/cpp/preprocessor/pointers-to-members?view=vs-2019
+    add_compile_options(/vmg /wd4996 /experimental:preprocessor)
+endif(MSVC)
+
 ###################################################################################################
 ## get oatpp main module in specified location
 
