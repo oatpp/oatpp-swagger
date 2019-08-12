@@ -14,34 +14,85 @@ jobs:
     steps:
       - script: |
           mkdir build
-      - task: CMake@1
       - script: |
-          cmake -DOATPP_MODULES_LOCATION=EXTERNAL ..
+          git clone https://github.com/oatpp/oatpp
+          mkdir -p oatpp/build
+        displayName: 'Checkout - oatpp'
+        workingDirectory: build
+      - script: |
+          cmake ..
+          sudo make install
+        displayName: 'Build - oatpp'
+        workingDirectory: build/oatpp/build
+      - script: |
+          cmake ..
           make
-        displayName: 'CMake'
+        displayName: 'Build - module'
         workingDirectory: build
       - script: |
           make test ARGS="-V"
         displayName: 'Test'
         workingDirectory: build
 
-#  - job: macOS
-#    displayName: 'Build - macOS-10.13'
-#    continueOnError: false
-#    pool:
-#      vmImage: 'macOS-10.13'
-#    workspace:
-#      clean: all
-#    steps:
-#      - script: |
-#          mkdir build
-#      - task: CMake@1
-#      - script: |
-#          cmake -DOATPP_MODULES_LOCATION=EXTERNAL ..
-#          make
-#        displayName: 'CMake'
-#        workingDirectory: build
-#      - script: |
-#          make test ARGS="-V"
-#        displayName: 'Test'
-#        workingDirectory: build
+  - job: macOS
+    displayName: 'Build - macOS-10.13'
+    continueOnError: false
+    pool:
+      vmImage: 'macOS-10.13'
+    workspace:
+      clean: all
+    steps:
+      - script: |
+          mkdir build
+      - script: |
+          git clone https://github.com/oatpp/oatpp
+          mkdir -p oatpp/build
+        displayName: 'Checkout - oatpp'
+        workingDirectory: build
+      - script: |
+          cmake ..
+          sudo make install
+        displayName: 'Build - oatpp'
+        workingDirectory: build/oatpp/build
+      - script: |
+          cmake ..
+          make
+        displayName: 'Build - module'
+        workingDirectory: build
+      - script: |
+          make test ARGS="-V"
+        displayName: 'Test'
+        workingDirectory: build
+
+
+  - job: windows
+    displayName: 'Build - Windows'
+    continueOnError: false
+    pool:
+      vmImage: 'windows-latest'
+    workspace:
+      clean: all
+    steps:
+      - script: |
+          MD build
+      - script: |
+          git clone https://github.com/oatpp/oatpp
+          MD oatpp\build
+        displayName: 'Checkout - oatpp'
+        workingDirectory: build
+      - script: |
+          cmake ..
+          cmake --build . --target INSTALL
+        displayName: 'Build - oatpp'
+        workingDirectory: build\oatpp\build
+
+      - script: |
+          cmake ..
+          cmake --build .
+        displayName: 'Build - module'
+        workingDirectory: build
+
+      - script: |
+          module-tests.exe
+        displayName: 'Test'
+        workingDirectory: build\test\Debug\
