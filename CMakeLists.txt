@@ -100,7 +100,7 @@ message("\n#####################################################################
 if (MSVC)
     # Add compilerswitch to allow pointer-to-members
     # https://docs.microsoft.com/en-us/cpp/preprocessor/pointers-to-members?view=vs-2019
-    add_compile_options(/vmg /wd4996)
+    add_compile_options(/vmg /wd4996 /experimental:preprocessor)
 endif(MSVC)
 
 include(cmake/module-utils.cmake)
