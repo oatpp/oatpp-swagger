@@ -207,11 +207,8 @@ class ServerVariable : public oatpp::data::mapping::type::Object {
       if(model->enumValues) {
         
         result->enumValues = List<String>::createShared();
-        
-        auto curr = model->enumValues->getFirstNode();
-        while(curr != nullptr) {
-          result->enumValues->pushBack(curr->getData());
-          curr = curr->getNext();
+        for(const auto &it : *model->enumValues) {
+          result->enumValues->pushBack(it);
         }
         
       }
@@ -262,13 +259,11 @@ class Server : public oatpp::data::mapping::type::Object {
       if(model->variables) {
         
         result->variables = Fields<ServerVariable::ObjectWrapper>::createShared();
-        
-        auto curr = model->variables->getFirstEntry();
-        while (curr != nullptr) {
-          result->variables->put(curr->getKey(), ServerVariable::createFromBaseModel(curr->getValue()));
-          curr = curr->getNext();
+
+        for(const auto &it : *model->variables){
+          result->variables->put(it.first, ServerVariable::createFromBaseModel(it.second));
         }
-        
+
       }
       
       return result;
@@ -325,6 +320,111 @@ class MediaTypeObject : public oatpp::data::mapping::type::Object {
    */
   DTO_FIELD(Schema::ObjectWrapper, schema);
   
+};
+
+/**
+ * OAuth flow Object https://swagger.io/specification/#oauthFlowObject
+ */
+class OAuthFlowObject : public oatpp::data::mapping::type::Object {
+
+ DTO_INIT(OAuthFlowObject, Object)
+
+  /**
+   * &l:Authorization Url;
+   */
+  DTO_FIELD(String, authorizationUrl);
+
+  /**
+   * &l:Token Url;
+   */
+  DTO_FIELD(String, tokenUrl);
+
+  /**
+   * &l:Refresh Url;
+   */
+  DTO_FIELD(String, refreshUrl);
+
+  /**
+   * &l:Scopes;
+   */
+  DTO_FIELD(Fields<String>::ObjectWrapper, scopes);
+};
+
+/**
+ * OAuth Flows Object https://swagger.io/specification/#oauthFlowObject
+ */
+class OAuthFlowsObject : public oatpp::data::mapping::type::Object {
+
+ DTO_INIT(OAuthFlowsObject, Object)
+
+  /**
+   * &l:Implicit;
+   */
+  DTO_FIELD(OAuthFlowObject::ObjectWrapper, implicit);
+
+  /**
+   *  &l:Password;
+   */
+  DTO_FIELD(OAuthFlowObject::ObjectWrapper, password);
+
+  /**
+   *  &l:Client Credentials;
+   */
+  DTO_FIELD(OAuthFlowObject::ObjectWrapper, clientCredentials);
+
+  /**
+   *  &l:Authorization Code;
+   */
+  DTO_FIELD(OAuthFlowObject::ObjectWrapper, authorizationCode);
+};
+
+/**
+ * Security Scheme object.
+ */
+class SecuritySchemeObject : public oatpp::data::mapping::type::Object {
+
+ DTO_INIT(SecuritySchemeObject, Object)
+
+  /**
+   * &l:Type;.
+   */
+  DTO_FIELD(String, type);
+
+  /**
+   * &l:Description;.
+   */
+  DTO_FIELD(String, description);
+
+  /**
+   * &l:Name;.
+   */
+  DTO_FIELD(String, name);
+
+  /**
+   * &l:In;.
+   */
+  DTO_FIELD(String, in);
+
+  /**
+   * &l:Scheme;.
+   */
+  DTO_FIELD(String, scheme);
+
+  /**
+   * &l:Bearer Format;.
+   */
+  DTO_FIELD(String, bearerFormat);
+
+  /**
+   * &l:Flows;.
+   */
+  DTO_FIELD(OAuthFlowsObject::ObjectWrapper, flows);
+
+  /**
+   * &l:Open Id Connect Url;.
+   */
+  DTO_FIELD(String, openIdConnectUrl);
+
 };
 
 /**
@@ -446,6 +546,11 @@ class PathItemOperation : public oatpp::data::mapping::type::Object {
    */
   DTO_FIELD(List<PathItemParameter::ObjectWrapper>::ObjectWrapper, parameters);
 
+  /**
+   * Security requirements.
+   */
+  DTO_FIELD(List<Fields<List<String>::ObjectWrapper>::ObjectWrapper>::ObjectWrapper, security);
+
 };
 
 /**
@@ -509,7 +614,12 @@ class Components : public oatpp::data::mapping::type::Object {
    * Map of &id:oatpp::String; to &l:Schema;.
    */
   DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, schemas);
-  
+
+  /**
+   * Map of &id:oatpp::String; to &l:Schema;.
+   */
+  DTO_FIELD(Fields<SecuritySchemeObject::ObjectWrapper>::ObjectWrapper, securitySchemes);
+
 };
 
 /**

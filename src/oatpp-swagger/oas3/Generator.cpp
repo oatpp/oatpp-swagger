@@ -144,9 +144,9 @@ void Generator::addParamsToParametersList(const PathItemParameters::ObjectWrappe
 }
 
 RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
-  
+
   if(endpointInfo.consumes.size() > 0) {
-    
+
     auto body = RequestBody::createShared();
     body->description = "request body";
     body->content = body->content->createShared();
@@ -161,13 +161,13 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
       
       it++;
     }
-    
+
     return body;
-    
+
   } else {
   
     if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
-      
+
       auto body = RequestBody::createShared();
       body->description = "request body";
       
@@ -191,17 +191,17 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
           body->content->put("text/plain", mediaType);
         }
       }
-      
+
       return body;
-      
+
     }
-    
+
   }
   
   return nullptr;
-  
+
 }
-  
+
 Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
   auto responses = Fields<OperationResponse::ObjectWrapper>::createShared();
@@ -276,14 +276,42 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
 
       operation->parameters = operation->parameters->createShared();
 
-      addParamsToParametersList(operation->parameters, info->headers, "header", usedTypes);
+      Endpoint::Info::Params filteredHeaders;
+      if(!info->headers.getOrder().empty()) {
+        for (const auto &header : info->headers.getOrder()) {
+          // We don't want the Authorization header listed as Parameter. This should be done in ENDPOINT_INFO() { info->addSecurityRequirement( /* SSONAME */ ); }
+          if (header != oatpp::web::protocol::http::Header::AUTHORIZATION) {
+            filteredHeaders[header] = info->headers[header];
+          }
+        }
+      }
+
+      addParamsToParametersList(operation->parameters, filteredHeaders, "header", usedTypes);
       addParamsToParametersList(operation->parameters, info->pathParams, "path", usedTypes);
       addParamsToParametersList(operation->parameters, info->queryParams, "query", usedTypes);
 
     }
-    
+
+    if(!info->securityRequirements.empty()) {
+      operation->security = operation->security->createShared();
+      for(const auto &sec : info->securityRequirements) {
+        if(sec.second == nullptr) {
+          // who ever came up to define "security" as an array of objects of array of strings
+          auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
+          fields->put(sec.first, Components::List<String>::createShared());
+          operation->security->pushBack(fields);
+        } else {
+          auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
+          auto sro = Components::List<String>::createShared();
+          for(const auto &sr : *sec.second) {
+            sro->pushBack(sr);
+          }
+          fields->put(sec.first, sro);
+          operation->security->pushBack(fields);
+        }
+      }
+    }
   }
-  
 }
   
 Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes) {
@@ -378,7 +406,8 @@ Generator::UsedTypes Generator::decomposeTypes(UsedTypes& usedTypes) {
   
 }
   
-Components::ObjectWrapper Generator::generateComponents(const UsedTypes& decomposedTypes) {
+Components::ObjectWrapper Generator::generateComponents(const UsedTypes &decomposedTypes,
+                                                        const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos) {
   
   auto result = Components::createShared();
   result->schemas = result->schemas->createShared();
@@ -389,7 +418,14 @@ Components::ObjectWrapper Generator::generateComponents(const UsedTypes& decompo
     result->schemas->put(it->first, generateSchemaForType(it->second, false, schemas));
     it ++;
   }
-  
+
+  if(ssos) {
+    result->securitySchemes = result->securitySchemes->createShared();
+    for (const auto &sso : *ssos) {
+      result->securitySchemes->put(sso.first, generateSSO(sso.second));
+    }
+  }
+
   return result;
   
 }
@@ -401,22 +437,85 @@ Document::ObjectWrapper Generator::generateDocument(const std::shared_ptr<oatpp:
   
   if(docInfo->servers) {
     document->servers = document->servers->createShared();
-    
-    auto curr = docInfo->servers->getFirstNode();
-    while (curr != nullptr) {
-      document->servers->pushBack(Server::createFromBaseModel(curr->getData()));
-      curr = curr->getNext();
+
+    for(const auto &it : *docInfo->servers) {
+      document->servers->pushBack(Server::createFromBaseModel(it));
     }
-    
+
   }
   
   UsedTypes usedTypes;
   document->paths = generatePaths(endpoints, usedTypes);
   auto decomposedTypes = decomposeTypes(usedTypes);
-  document->components = generateComponents(decomposedTypes);
-  
+  document->components = generateComponents(decomposedTypes, docInfo->ssos);
+
   return document;
   
 }
-  
+
+SecuritySchemeObject::ObjectWrapper Generator::generateSSO(const std::shared_ptr<oatpp::swagger::SecuritySchemeObject> &sso) {
+  auto oassso = oatpp::swagger::oas3::SecuritySchemeObject::createShared();
+
+  oassso->type = sso->type;
+  oassso->description = sso->description;
+  oassso->openIdConnectUrl = sso->openIdConnectUrl;
+  oassso->in = sso->in;
+  oassso->bearerFormat = sso->bearerFormat;
+  oassso->name = sso->name;
+  oassso->scheme = sso->scheme;
+
+  if(sso->flows) {
+    oassso->flows = oassso->flows->createShared();
+    if(sso->flows->implicit) {
+      oassso->flows->implicit = oassso->flows->implicit->createShared();
+      oassso->flows->implicit->tokenUrl = sso->flows->implicit->tokenUrl;
+      oassso->flows->implicit->refreshUrl = sso->flows->implicit->refreshUrl;
+      oassso->flows->implicit->authorizationUrl = sso->flows->implicit->authorizationUrl;
+      if(sso->flows->implicit->scopes) {
+        oassso->flows->implicit->scopes->createShared();
+        for(const auto &scope : *sso->flows->implicit->scopes) {
+          oassso->flows->implicit->scopes->put(scope.first, scope.second);
+        }
+      }
+    }
+    if(sso->flows->password) {
+      oassso->flows->password = oassso->flows->password->createShared();
+      oassso->flows->password->tokenUrl = sso->flows->password->tokenUrl;
+      oassso->flows->password->refreshUrl = sso->flows->password->refreshUrl;
+      oassso->flows->password->authorizationUrl = sso->flows->password->authorizationUrl;
+      if(sso->flows->password->scopes) {
+        oassso->flows->password->scopes->createShared();
+        for(const auto &scope : *sso->flows->password->scopes) {
+          oassso->flows->password->scopes->put(scope.first, scope.second);
+        }
+      }
+    }
+    if(sso->flows->clientCredentials) {
+      oassso->flows->clientCredentials = oassso->flows->clientCredentials->createShared();
+      oassso->flows->clientCredentials->tokenUrl = sso->flows->clientCredentials->tokenUrl;
+      oassso->flows->clientCredentials->refreshUrl = sso->flows->clientCredentials->refreshUrl;
+      oassso->flows->clientCredentials->authorizationUrl = sso->flows->clientCredentials->authorizationUrl;
+      if(sso->flows->clientCredentials->scopes) {
+        oassso->flows->clientCredentials->scopes->createShared();
+        for(const auto &scope : *sso->flows->clientCredentials->scopes) {
+          oassso->flows->clientCredentials->scopes->put(scope.first, scope.second);
+        }
+      }
+    }
+    if(sso->flows->authorizationCode) {
+      oassso->flows->authorizationCode = oassso->flows->authorizationCode->createShared();
+      oassso->flows->authorizationCode->tokenUrl = sso->flows->authorizationCode->tokenUrl;
+      oassso->flows->authorizationCode->refreshUrl = sso->flows->authorizationCode->refreshUrl;
+      oassso->flows->authorizationCode->authorizationUrl = sso->flows->authorizationCode->authorizationUrl;
+      if(sso->flows->authorizationCode->scopes) {
+        oassso->flows->authorizationCode->scopes->createShared();
+        for(const auto &scope : *sso->flows->authorizationCode->scopes) {
+          oassso->flows->authorizationCode->scopes->put(scope.first, scope.second);
+        }
+      }
+    }
+  }
+  return oassso;
+}
+
 }}}

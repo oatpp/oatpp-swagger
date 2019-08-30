@@ -78,14 +78,17 @@ private:
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
   static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes);
-  
+
+  static SecuritySchemeObject::ObjectWrapper generateSSO(const std::shared_ptr<oatpp::swagger::SecuritySchemeObject> &sso);
+
   static void decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
-  static Components::ObjectWrapper generateComponents(const UsedTypes& decomposedTypes);
+  static Components::ObjectWrapper generateComponents(const UsedTypes &decomposedTypes,
+                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos);
 
 public:
 

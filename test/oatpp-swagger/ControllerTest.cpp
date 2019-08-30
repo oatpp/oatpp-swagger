@@ -35,7 +35,15 @@ namespace {
         .setLicenseName("Apache License, Version 2.0")
         .setLicenseUrl("http://www.apache.org/licenses/LICENSE-2.0")
 
-        .addServer("http://localhost:8000", "server on localhost");
+        .addServer("http://localhost:8000", "server on localhost")
+
+        .addSSO("basic_auth",
+          oatpp::swagger::DocumentInfo::SSOBuilder()
+           .setDescription("Basic Authorization")
+           .setType("http")
+           .setScheme("basic")
+           .build()
+        );
 
       return builder.build();
 

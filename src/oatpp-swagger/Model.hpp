@@ -30,8 +30,6 @@
 #ifndef oatpp_swagger_Config_hpp
 #define oatpp_swagger_Config_hpp
 
-#include "oatpp/core/collection/ListMap.hpp"
-#include "oatpp/core/collection/LinkedList.hpp"
 #include "oatpp/core/Types.hpp"
 
 namespace oatpp { namespace swagger {
@@ -157,7 +155,7 @@ struct ServerVariable {
   /**
    * Enum values.
    */
-  std::shared_ptr<oatpp::collection::LinkedList<String>> enumValues;
+  std::shared_ptr<std::list<String>> enumValues;
 
   /**
    * Default value.
@@ -192,8 +190,119 @@ struct Server {
   /**
    * Variables.
    */
-  std::shared_ptr<oatpp::collection::ListMap<String, std::shared_ptr<ServerVariable>>> variables;
+  std::shared_ptr<std::unordered_map<String, std::shared_ptr<ServerVariable>>> variables;
   
+};
+
+/**
+ * OAuth flow Object https://swagger.io/specification/#oauthFlowObject
+ */
+struct OAuthFlowObject {
+
+  static std::shared_ptr<OAuthFlowObject> createShared() {
+    return std::make_shared<OAuthFlowObject>();
+  }
+
+  /**
+   * Authorization Url
+   */
+  oatpp::String authorizationUrl;
+
+  /**
+   * Token Url
+   */
+  oatpp::String tokenUrl;
+
+  /**
+   * Refresh Url
+   */
+  oatpp::String refreshUrl;
+
+  /**
+   * Scopes
+   */
+  std::shared_ptr<std::unordered_map<String, String>> scopes;
+};
+
+/**
+ * OAuth Flows Object https://swagger.io/specification/#oauthFlowObject
+ */
+struct OAuthFlowsObject {
+
+  static std::shared_ptr<OAuthFlowsObject> createShared() {
+    return std::make_shared<OAuthFlowsObject>();
+  }
+
+  /**
+   * Implicit
+   */
+  std::shared_ptr<OAuthFlowObject> implicit;
+
+  /**
+   *  Password
+   */
+  std::shared_ptr<OAuthFlowObject> password;
+
+  /**
+   *  Client Credentials
+   */
+  std::shared_ptr<OAuthFlowObject> clientCredentials;
+
+  /**
+   *  Authorization Code
+   */
+  std::shared_ptr<OAuthFlowObject> authorizationCode;
+};
+
+/**
+ * Security Scheme object.
+ */
+struct SecuritySchemeObject {
+
+  static std::shared_ptr<SecuritySchemeObject> createShared() {
+    return std::make_shared<SecuritySchemeObject>();
+  }
+
+  /**
+   * Type
+   */
+  oatpp::String type;
+
+  /**
+   * Description
+   */
+  oatpp::String description;
+
+  /**
+   * Name
+   */
+  oatpp::String name;
+
+  /**
+   * In
+   */
+  oatpp::String in;
+
+  /**
+   * &l:Scheme;.
+   */
+  oatpp::String scheme;
+
+  /**
+   * &l:Bearer Format;.
+   */
+  oatpp::String bearerFormat;
+
+  /**
+   * &l:Flows;.
+   */
+  std::shared_ptr<OAuthFlowsObject> flows;
+
+  /**
+   * &l:Open Id Connect Url;.
+   */
+  oatpp::String openIdConnectUrl;
+
 };
 
 /**
@@ -218,7 +327,148 @@ public:
   /**
    * List of &l:Server;.
    */
-  std::shared_ptr<oatpp::collection::LinkedList<std::shared_ptr<Server>>> servers;
+  std::shared_ptr<std::list<std::shared_ptr<Server>>> servers;
+
+
+  /**
+   * Map of &l:SecuritySchemeObject
+   */
+   std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>> ssos;
+
+  /**
+  * SecuritySchemeObject Builder
+  */
+  class SSOBuilder {
+
+   private:
+    oatpp::String m_type;
+    oatpp::String m_description;
+    oatpp::String m_name;
+    oatpp::String m_in;
+    oatpp::String m_scheme;
+    oatpp::String m_bearerFormat;
+    std::shared_ptr<OAuthFlowsObject> m_flows;
+    oatpp::String m_openIdConnectUrl;
+
+    std::shared_ptr<OAuthFlowsObject> getFlows() {
+      if(!m_flows) {
+        m_flows = OAuthFlowsObject::createShared();
+      }
+      return m_flows;
+    }
+
+   public:
+    SSOBuilder& setType(const String &type) {
+      m_type = type;
+      return *this;
+    }
+    SSOBuilder& setDescription(const String &description) {
+      m_description = description;
+      return *this;
+    }
+    SSOBuilder& setName(const String &name) {
+      m_name = name;
+      return *this;
+    }
+    SSOBuilder& setIn(const String &in) {
+      m_in = in;
+      return *this;
+    }
+    SSOBuilder& setScheme(const String &scheme) {
+      m_scheme = scheme;
+      return *this;
+    }
+    SSOBuilder& setBearerFormat(const String &bearer_format) {
+      m_bearerFormat = bearer_format;
+      return *this;
+    }
+    SSOBuilder& setImplicitFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->implicit = flow;
+      return *this;
+    }
+    SSOBuilder& setPasswordFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->password = flow;
+      return *this;
+    }
+    SSOBuilder& setClientCredentialsFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->clientCredentials = flow;
+      return *this;
+    }
+    SSOBuilder& setAuthorizationCodeFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->authorizationCode = flow;
+      return *this;
+    }
+    SSOBuilder& setOpenIdConnectUrl(const String &open_id_connect_url) {
+      m_openIdConnectUrl = open_id_connect_url;
+      return *this;
+    }
+
+    /**
+     * Build SecuritySchemeObject
+     * @return
+     */
+    std::shared_ptr<SecuritySchemeObject> build() {
+      auto sso = SecuritySchemeObject::createShared();
+      sso->description = m_description;
+      sso->scheme = m_scheme;
+      sso->type = m_type;
+      sso->name = m_name;
+      sso->bearerFormat = m_bearerFormat;
+      sso->flows = m_flows;
+      sso->in = m_in;
+      sso->openIdConnectUrl = m_openIdConnectUrl;
+      return sso;
+    }
+  };
+
+  /**
+   * OAuthFlowObject Builder
+   */
+  class OAFOBuilder {
+   private:
+    oatpp::String m_authorizationUrl;
+    oatpp::String m_tokenUrl;
+    oatpp::String m_refreshUrl;
+    std::shared_ptr<std::unordered_map<String, String>> m_scopes;
+
+    std::shared_ptr<std::unordered_map<String, String>> getScopes() {
+      if(!m_scopes) {
+        m_scopes = std::make_shared<std::unordered_map<String, String>>();
+      }
+      return m_scopes;
+    }
+
+   public:
+    OAFOBuilder& setAuthorizationUrl(const String &authorization_url) {
+      m_authorizationUrl = authorization_url;
+      return *this;
+    }
+    OAFOBuilder& setTokenUrl(const String &token_url) {
+      m_tokenUrl = token_url;
+      return *this;
+    }
+    OAFOBuilder& setRefreshUrl(const String &refresh_url) {
+      m_refreshUrl = refresh_url;
+      return *this;
+    }
+    OAFOBuilder& addScope(const String &name, const String &scope){
+      getScopes()->at(name) = scope;
+      return *this;
+    }
+
+    /**
+     * Build OAuthFlowObject
+     * @return
+     */
+    std::shared_ptr<OAuthFlowObject> build() {
+      auto oafo = OAuthFlowObject::createShared();
+      oafo->authorizationUrl = m_authorizationUrl;
+      oafo->refreshUrl = m_refreshUrl;
+      oafo->tokenUrl = m_tokenUrl;
+      oafo->scopes = m_scopes;
+      return oafo;
+    }
+  };
 
   /**
    * Document Info Builder.
@@ -227,8 +477,9 @@ public:
   private:
     
     std::shared_ptr<DocumentHeader> m_header;
-    std::shared_ptr<oatpp::collection::LinkedList<std::shared_ptr<Server>>> m_servers;
-    
+    std::shared_ptr<std::list<std::shared_ptr<Server>>> m_servers;
+    std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>> m_ssos;
+
     std::shared_ptr<DocumentHeader> getHeader() {
       if(!m_header) {
         m_header = DocumentHeader::createShared();
@@ -250,6 +501,13 @@ public:
         header->license = License::createShared();
       }
       return header->license;
+    }
+
+    std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>> getSSOS() {
+      if(!m_ssos) {
+        m_ssos = std::make_shared<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>>();
+      }
+      return m_ssos;
     }
     
   public:
@@ -351,9 +609,9 @@ public:
      */
     Builder& addServer(const std::shared_ptr<Server>& server) {
       if(!m_servers) {
-        m_servers = oatpp::collection::LinkedList<std::shared_ptr<Server>>::createShared();
+        m_servers = std::make_shared<std::list<std::shared_ptr<Server>>>();
       }
-      m_servers->pushBack(server);
+      m_servers->push_back(server);
       return *this;
     }
 
@@ -371,6 +629,17 @@ public:
     }
 
     /**
+     * Add &l::SecuritySchemeObject
+     * @param name
+     * @param sso
+     * @return - &l:DocumentInfo::Builder;.
+     */
+    Builder& addSSO(const oatpp::String& name, const std::shared_ptr<SecuritySchemeObject> &sso) {
+      getSSOS()->operator[](name) = sso; //ugly but works
+      return *this;
+    }
+
+    /**
      * Build Document Info.
      * @return - &l:DocumentInfo;.
      */
@@ -378,6 +647,7 @@ public:
       auto document = DocumentInfo::createShared();
       document->header = m_header;
       document->servers = m_servers;
+      document->ssos = m_ssos;
       return document;
     }
     
