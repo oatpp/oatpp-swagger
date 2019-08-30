@@ -40,6 +40,8 @@ namespace oatpp { namespace swagger { namespace oas3 {
 class Generator {
 public:
 
+  static const char* TAG;
+
   /**
    * Convenience typedef for &id:oatpp::web::server::api::Endpoint;.
    */
@@ -59,6 +61,8 @@ public:
   
   typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
 
+  typedef std::unordered_map<oatpp::String, bool> UsedSSOs;
+
 private:
   static void addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
                                         Endpoint::Info::Params& params,
@@ -72,12 +76,12 @@ private:
 
   static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes);
+  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSSOs &usedSSOs);
   
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes);
+  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSSOs &usedSSOs);
 
   static SecuritySchemeObject::ObjectWrapper generateSSO(const std::shared_ptr<oatpp::swagger::SecuritySchemeObject> &sso);
 
@@ -88,7 +92,8 @@ private:
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
   static Components::ObjectWrapper generateComponents(const UsedTypes &decomposedTypes,
-                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos);
+                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos,
+                                                      UsedSSOs &usedSSOs);
 
 public:
 

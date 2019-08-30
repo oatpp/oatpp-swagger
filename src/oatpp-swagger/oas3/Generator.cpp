@@ -27,7 +27,9 @@
 #include "oatpp/core/utils/ConversionUtils.hpp"
 
 namespace oatpp { namespace swagger { namespace oas3 {
- 
+
+const char* Generator::TAG = "oatpp-swagger::oas3::Generator";
+
 Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
@@ -240,7 +242,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
     
 }
   
-void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes) {
+void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSSOs &usedSSOs) {
   
   auto info = endpoint->info;
   
@@ -293,28 +295,44 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     }
 
     if(!info->securityRequirements.empty()) {
-      operation->security = operation->security->createShared();
-      for(const auto &sec : info->securityRequirements) {
-        if(sec.second == nullptr) {
-          // who ever came up to define "security" as an array of objects of array of strings
-          auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
-          fields->put(sec.first, Components::List<String>::createShared());
-          operation->security->pushBack(fields);
-        } else {
-          auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
-          auto sro = Components::List<String>::createShared();
-          for(const auto &sr : *sec.second) {
-            sro->pushBack(sr);
+      OATPP_ASSERT(info->authorization && "[oatpp-swagger::oas3::Generator::generatePathItemData()]: Error. Endpoint has security requirement but is no authorized endpoint.");
+    }
+
+    if(info->authorization) {
+      OATPP_ASSERT(!info->securityRequirements.empty() && "[oatpp-swagger::oas3::Generator::generatePathItemData()]: Error. Authorized endpoint with no security requirements (info->addSecurityRequirement()) set.");
+
+      if (!info->securityRequirements.empty()) {
+
+        operation->security = operation->security->createShared();
+
+        for (const auto &sec : info->securityRequirements) {
+
+          usedSSOs[sec.first] = true;
+          if (sec.second == nullptr) {
+
+            // who ever came up to define "security" as an array of objects of array of strings
+            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
+            fields->put(sec.first, Components::List<String>::createShared());
+            operation->security->pushBack(fields);
+
+          } else {
+
+            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
+            auto sro = Components::List<String>::createShared();
+            for (const auto &sr : *sec.second) {
+              sro->pushBack(sr);
+            }
+            fields->put(sec.first, sro);
+            operation->security->pushBack(fields);
+
           }
-          fields->put(sec.first, sro);
-          operation->security->pushBack(fields);
         }
       }
     }
   }
 }
   
-Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes) {
+Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSSOs &usedSSOs) {
   
   auto result = Paths::createShared();
   
@@ -337,7 +355,7 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
         result->put(path, pathItem);
       }
 
-      generatePathItemData(endpoint, pathItem, usedTypes);
+      generatePathItemData(endpoint, pathItem, usedTypes, usedSSOs);
     }
     
     curr = curr->getNext();
@@ -407,7 +425,8 @@ Generator::UsedTypes Generator::decomposeTypes(UsedTypes& usedTypes) {
 }
   
 Components::ObjectWrapper Generator::generateComponents(const UsedTypes &decomposedTypes,
-                                                        const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos) {
+                                                        const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecuritySchemeObject>>> &ssos,
+                                                        UsedSSOs &usedSSOs) {
   
   auto result = Components::createShared();
   result->schemas = result->schemas->createShared();
@@ -421,8 +440,9 @@ Components::ObjectWrapper Generator::generateComponents(const UsedTypes &decompo
 
   if(ssos) {
     result->securitySchemes = result->securitySchemes->createShared();
-    for (const auto &sso : *ssos) {
-      result->securitySchemes->put(sso.first, generateSSO(sso.second));
+    for (const auto &sso : usedSSOs) {
+        OATPP_ASSERT(ssos->find(sso.first) != ssos->end() && "[oatpp-swagger::oas3::Generator::generateComponents()]: Error. Requested unknown security requirement.");
+        result->securitySchemes->put(sso.first, generateSSO(ssos->at(sso.first)));
     }
   }
 
@@ -445,9 +465,10 @@ Document::ObjectWrapper Generator::generateDocument(const std::shared_ptr<oatpp:
   }
   
   UsedTypes usedTypes;
-  document->paths = generatePaths(endpoints, usedTypes);
+  UsedSSOs usedSSOs;
+  document->paths = generatePaths(endpoints, usedTypes, usedSSOs);
   auto decomposedTypes = decomposeTypes(usedTypes);
-  document->components = generateComponents(decomposedTypes, docInfo->ssos);
+  document->components = generateComponents(decomposedTypes, docInfo->ssos, usedSSOs);
 
   return document;
   

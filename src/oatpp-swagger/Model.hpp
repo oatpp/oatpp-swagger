@@ -358,6 +358,42 @@ public:
     }
 
    public:
+
+    /**
+     * Convenience default Basic-Authorization SSO
+     * @return
+     */
+    static std::shared_ptr<SecuritySchemeObject> DefaultBasicAuthorizationSSO() {
+      auto sso = SecuritySchemeObject::createShared();
+      sso->description = "Default HTTP Basic Authorization";
+      sso->scheme = "basic";
+      sso->type = "http";
+      sso->name = nullptr;
+      sso->bearerFormat = nullptr;
+      sso->flows = nullptr;
+      sso->in = nullptr;
+      sso->openIdConnectUrl = nullptr;
+      return sso;
+    }
+
+    /**
+     * Convenience default Bearer-Authorization SSO
+     * @param bearerFormat - for documentation purposes
+     * @return
+     */
+    static std::shared_ptr<SecuritySchemeObject> DefaultBearerAuthorizationSSO(const oatpp::String &bearerFormat = nullptr) {
+      auto sso = SecuritySchemeObject::createShared();
+      sso->description = "Default HTTP Basic Authorization";
+      sso->scheme = "bearer";
+      sso->type = "http";
+      sso->name = nullptr;
+      sso->bearerFormat = bearerFormat;
+      sso->flows = nullptr;
+      sso->in = nullptr;
+      sso->openIdConnectUrl = nullptr;
+      return sso;
+    }
+
     SSOBuilder& setType(const String &type) {
       m_type = type;
       return *this;
@@ -630,6 +666,10 @@ public:
 
     /**
      * Add &l::SecuritySchemeObject
+     *  When you are using the AUTHENTICATION() Endpoint-Macro you must add an SecuritySchemeObject (https://swagger.io/specification/#securitySchemeObject)
+     * For basic-authentication you can use the default Basic-Authorization-SSO like this
+     * For more complex authentication schemes you can use the oatpp::swagger::DocumentInfo::SSOBuilder builder
+     * Don't forget to add info->addAuthorizationRequirement(name) to your ENDPOINT_INFO() macro!
      * @param name
      * @param sso
      * @return - &l:DocumentInfo::Builder;.
