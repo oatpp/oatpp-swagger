@@ -49,7 +49,7 @@ namespace {
      */
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, swaggerResources)([] {
       // Make sure to specify correct full path to oatpp-swagger/res folder !!!
-      return oatpp::swagger::Resources::loadResources(OATPP_SWAGGER_RES_PATH);
+      return oatpp::swagger::Resources::streamResources(OATPP_SWAGGER_RES_PATH);
     }());
 
   };
@@ -72,25 +72,43 @@ void ControllerTest::onRun() {
 
   auto swaggerController = oatpp::swagger::Controller::createShared(docEndpoints);
 
-  // Get api json from swaggerController
-  oatpp::data::stream::ChunkedBuffer stream;
+  { // OAS-Doc
 
-  auto response = swaggerController->api();
-  response->send(&stream);
+    // Get api json from swaggerController
+    oatpp::data::stream::ChunkedBuffer stream;
 
-  std::cout << stream.toString()->c_str() << "\n\n";
+    auto response = swaggerController->api();
+    response->send(&stream);
 
-  auto responseText = stream.toString();
+    std::cout << stream.toString()->c_str() << "\n\n";
 
-  oatpp::parser::Caret caret(responseText);
-  caret.findChar('{');
+    auto responseText = stream.toString();
 
-  auto document = objectMapper->readFromCaret<oatpp::swagger::oas3::Document>(caret);
+    oatpp::parser::Caret caret(responseText);
+    caret.findChar('{');
 
-  if(caret.hasError()) {
-    OATPP_LOGD(TAG, "error='%s', pos=%d", caret.getErrorMessage(), caret.getPosition());
+    auto document = objectMapper->readFromCaret<oatpp::swagger::oas3::Document>(caret);
+
+    if (caret.hasError()) {
+      OATPP_LOGD(TAG, "error='%s', pos=%d", caret.getErrorMessage(), caret.getPosition());
+    }
+    OATPP_ASSERT(caret.hasError() == false);
+
   }
-  OATPP_ASSERT(caret.hasError() == false);
+
+  { // index.html test
+    // Get index.html from swaggerController
+    oatpp::data::stream::ChunkedBuffer stream;
+
+    auto response = swaggerController->getUIRoot();
+    response->send(&stream);
+
+    auto responseText = stream.toString();
+    OATPP_LOGD(TAG, responseText->c_str());
+
+  }
+
+
 
   // TODO test generated document here
   OATPP_LOGV(TAG, "TODO implement test");

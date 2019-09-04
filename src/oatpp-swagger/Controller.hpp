@@ -32,6 +32,7 @@
 
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
+#include "oatpp/web/protocol/http/outgoing/ChunkedBody.hpp"
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
 
@@ -93,10 +94,20 @@ public:
   }
   
   ENDPOINT("GET", "/swagger/ui", getUIRoot) {
+    if(m_resources->isStreaming()) {
+      auto body = std::make_shared<oatpp::web::protocol::http::outgoing::ChunkedBody>
+          (m_resources->getResourceStream("index.html"), nullptr, 1024);
+      return OutgoingResponse::createShared(Status::CODE_200, body);
+    }
     return createResponse(Status::CODE_200, m_resources->getResource("index.html"));
   }
   
   ENDPOINT("GET", "/swagger/{filename}", getUIResource, PATH(String, filename)) {
+    if(m_resources->isStreaming()) {
+      auto body = std::make_shared<oatpp::web::protocol::http::outgoing::ChunkedBody>
+          (m_resources->getResourceStream(filename->c_str()), nullptr, 1024);
+      return OutgoingResponse::createShared(Status::CODE_200, body);
+    }
     return createResponse(Status::CODE_200, m_resources->getResource(filename->c_str()));
   }
   
