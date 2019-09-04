@@ -37,7 +37,7 @@ namespace {
 
         .addServer("http://localhost:8000", "server on localhost")
 
-        .addSSO("basic_auth", oatpp::swagger::DocumentInfo::SSOBuilder::DefaultBasicAuthorizationSSO() );
+        .addSecurityScheme("basic_auth", oatpp::swagger::DocumentInfo::SecuritySchemeBuilder::DefaultBasicAuthorizationSecurityScheme());
 
       return builder.build();
 

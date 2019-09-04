@@ -325,9 +325,9 @@ class MediaTypeObject : public oatpp::data::mapping::type::Object {
 /**
  * OAuth flow Object https://swagger.io/specification/#oauthFlowObject
  */
-class OAuthFlowObject : public oatpp::data::mapping::type::Object {
+class OAuthFlow : public oatpp::data::mapping::type::Object {
 
- DTO_INIT(OAuthFlowObject, Object)
+ DTO_INIT(OAuthFlow, Object)
 
   /**
    * Authorization url.
@@ -353,37 +353,37 @@ class OAuthFlowObject : public oatpp::data::mapping::type::Object {
 /**
  * OAuth Flows Object https://swagger.io/specification/#oauthFlowObject
  */
-class OAuthFlowsObject : public oatpp::data::mapping::type::Object {
+class OAuthFlows : public oatpp::data::mapping::type::Object {
 
- DTO_INIT(OAuthFlowsObject, Object)
+ DTO_INIT(OAuthFlows, Object)
 
   /**
    * Implicit.
    */
-  DTO_FIELD(OAuthFlowObject::ObjectWrapper, implicit);
+  DTO_FIELD(OAuthFlow::ObjectWrapper, implicit);
 
   /**
    * Password.
    */
-  DTO_FIELD(OAuthFlowObject::ObjectWrapper, password);
+  DTO_FIELD(OAuthFlow::ObjectWrapper, password);
 
   /**
    * Client credentials.
    */
-  DTO_FIELD(OAuthFlowObject::ObjectWrapper, clientCredentials);
+  DTO_FIELD(OAuthFlow::ObjectWrapper, clientCredentials);
 
   /**
    * Authorization code.
    */
-  DTO_FIELD(OAuthFlowObject::ObjectWrapper, authorizationCode);
+  DTO_FIELD(OAuthFlow::ObjectWrapper, authorizationCode);
 };
 
 /**
  * Security Scheme object.
  */
-class SecuritySchemeObject : public oatpp::data::mapping::type::Object {
+class SecurityScheme : public oatpp::data::mapping::type::Object {
 
- DTO_INIT(SecuritySchemeObject, Object)
+ DTO_INIT(SecurityScheme, Object)
 
   /**
    * Type.
@@ -418,7 +418,7 @@ class SecuritySchemeObject : public oatpp::data::mapping::type::Object {
   /**
    * Flows.
    */
-  DTO_FIELD(OAuthFlowsObject::ObjectWrapper, flows);
+  DTO_FIELD(OAuthFlows::ObjectWrapper, flows);
 
   /**
    * Open id connect url.
@@ -616,9 +616,9 @@ class Components : public oatpp::data::mapping::type::Object {
   DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, schemas);
 
   /**
-   * Map of &id:oatpp::String; to &l:SecuritySchemeObject;.
+   * Map of &id:oatpp::String; to &l:SecurityScheme;.
    */
-  DTO_FIELD(Fields<SecuritySchemeObject::ObjectWrapper>::ObjectWrapper, securitySchemes);
+  DTO_FIELD(Fields<SecurityScheme::ObjectWrapper>::ObjectWrapper, securitySchemes);
 
 };
 
