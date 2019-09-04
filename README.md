@@ -65,7 +65,7 @@ OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, swaggerDoc
   // When you are using the AUTHENTICATION() Endpoint-Macro you must add an SecuritySchemeObject (https://swagger.io/specification/#securitySchemeObject)
   // For basic-authentication you can use the default Basic-Authorization-SSO like this
   // For more complex authentication schemes you can use the oatpp::swagger::DocumentInfo::SSOBuilder builder
-  // Don't forget to add info->addAuthorizationRequirement("basic_auth") to your ENDPOINT_INFO() Macro!
+  // Don't forget to add info->addSecurityRequirement("basic_auth") to your ENDPOINT_INFO() Macro!
   .addSSO("basic_auth", oatpp::swagger::DocumentInfo::SSOBuilder::DefaultBasicAuthorizationSSO() );
 
   return builder.build();

@@ -28,8 +28,6 @@
 
 namespace oatpp { namespace swagger { namespace oas3 {
 
-const char* Generator::TAG = "oatpp-swagger::oas3::Generator";
-
 Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");

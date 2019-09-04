@@ -239,23 +239,23 @@ struct OAuthFlowsObject {
   std::shared_ptr<OAuthFlowObject> implicit;
 
   /**
-   *  Password
+   * Password
    */
   std::shared_ptr<OAuthFlowObject> password;
 
   /**
-   *  Client Credentials
+   * Client Credentials
    */
   std::shared_ptr<OAuthFlowObject> clientCredentials;
 
   /**
-   *  Authorization Code
+   * Authorization Code
    */
   std::shared_ptr<OAuthFlowObject> authorizationCode;
 };
 
 /**
- * Security Scheme object.
+ * Security Scheme object - https://swagger.io/specification/#securitySchemeObject .
  */
 struct SecuritySchemeObject {
 
@@ -284,22 +284,22 @@ struct SecuritySchemeObject {
   oatpp::String in;
 
   /**
-   * &l:Scheme;.
+   * Scheme
    */
   oatpp::String scheme;
 
   /**
-   * &l:Bearer Format;.
+   * Bearer Format.
    */
   oatpp::String bearerFormat;
 
   /**
-   * &l:Flows;.
+   * Flows.
    */
   std::shared_ptr<OAuthFlowsObject> flows;
 
   /**
-   * &l:Open Id Connect Url;.
+   * Open Id Connect Url.
    */
   oatpp::String openIdConnectUrl;
 
@@ -329,15 +329,14 @@ public:
    */
   std::shared_ptr<std::list<std::shared_ptr<Server>>> servers;
 
-
   /**
-   * Map of &l:SecuritySchemeObject
+   * Map of &id:oatpp::String; to &l:SecuritySchemeObject;.
    */
    std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>> ssos;
 
   /**
-  * SecuritySchemeObject Builder
-  */
+   * SecuritySchemeObject Builder.
+   */
   class SSOBuilder {
 
    private:
@@ -360,8 +359,8 @@ public:
    public:
 
     /**
-     * Convenience default Basic-Authorization SSO
-     * @return
+     * Convenience default Basic-Authorization SSO.
+     * @return - &l:SecuritySchemeObject;.
      */
     static std::shared_ptr<SecuritySchemeObject> DefaultBasicAuthorizationSSO() {
       auto sso = SecuritySchemeObject::createShared();
@@ -377,11 +376,11 @@ public:
     }
 
     /**
-     * Convenience default Bearer-Authorization SSO
-     * @param bearerFormat - for documentation purposes
-     * @return
+     * Convenience default Bearer-Authorization SSO.
+     * @param bearerFormat - for documentation purposes.
+     * @return - &l:SecuritySchemeObject;.
      */
-    static std::shared_ptr<SecuritySchemeObject> DefaultBearerAuthorizationSSO(const oatpp::String &bearerFormat = nullptr) {
+    static std::shared_ptr<SecuritySchemeObject> DefaultBearerAuthorizationSSO(const oatpp::String& bearerFormat = nullptr) {
       auto sso = SecuritySchemeObject::createShared();
       sso->description = "Default HTTP Basic Authorization";
       sso->scheme = "bearer";
@@ -394,54 +393,119 @@ public:
       return sso;
     }
 
-    SSOBuilder& setType(const String &type) {
+    /**
+     * Set type.
+     * @param type
+     * @return
+     */
+    SSOBuilder& setType(const String& type) {
       m_type = type;
-      return *this;
-    }
-    SSOBuilder& setDescription(const String &description) {
-      m_description = description;
-      return *this;
-    }
-    SSOBuilder& setName(const String &name) {
-      m_name = name;
-      return *this;
-    }
-    SSOBuilder& setIn(const String &in) {
-      m_in = in;
-      return *this;
-    }
-    SSOBuilder& setScheme(const String &scheme) {
-      m_scheme = scheme;
-      return *this;
-    }
-    SSOBuilder& setBearerFormat(const String &bearer_format) {
-      m_bearerFormat = bearer_format;
-      return *this;
-    }
-    SSOBuilder& setImplicitFlow(const std::shared_ptr<OAuthFlowObject>& flow){
-      getFlows()->implicit = flow;
-      return *this;
-    }
-    SSOBuilder& setPasswordFlow(const std::shared_ptr<OAuthFlowObject>& flow){
-      getFlows()->password = flow;
-      return *this;
-    }
-    SSOBuilder& setClientCredentialsFlow(const std::shared_ptr<OAuthFlowObject>& flow){
-      getFlows()->clientCredentials = flow;
-      return *this;
-    }
-    SSOBuilder& setAuthorizationCodeFlow(const std::shared_ptr<OAuthFlowObject>& flow){
-      getFlows()->authorizationCode = flow;
-      return *this;
-    }
-    SSOBuilder& setOpenIdConnectUrl(const String &open_id_connect_url) {
-      m_openIdConnectUrl = open_id_connect_url;
       return *this;
     }
 
     /**
-     * Build SecuritySchemeObject
+     * Set description.
+     * @param description
      * @return
+     */
+    SSOBuilder& setDescription(const String& description) {
+      m_description = description;
+      return *this;
+    }
+
+    /**
+     * Set name.
+     * @param name
+     * @return
+     */
+    SSOBuilder& setName(const String& name) {
+      m_name = name;
+      return *this;
+    }
+
+    /**
+     * Set 'in'.
+     * @param in
+     * @return
+     */
+    SSOBuilder& setIn(const String& in) {
+      m_in = in;
+      return *this;
+    }
+
+    /**
+     * Set scheme.
+     * @param scheme
+     * @return
+     */
+    SSOBuilder& setScheme(const String& scheme) {
+      m_scheme = scheme;
+      return *this;
+    }
+
+    /**
+     * Set bearer format.
+     * @param bearerFormat
+     * @return
+     */
+    SSOBuilder& setBearerFormat(const String& bearerFormat) {
+      m_bearerFormat = bearerFormat;
+      return *this;
+    }
+
+    /**
+     * Set implicit flow.
+     * @param flow - &l:OAuthFlowObject;.
+     * @return
+     */
+    SSOBuilder& setImplicitFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->implicit = flow;
+      return *this;
+    }
+
+    /**
+     * Set password flow.
+     * @param flow - &l:OAuthFlowObject;.
+     * @return
+     */
+    SSOBuilder& setPasswordFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->password = flow;
+      return *this;
+    }
+
+    /**
+     * Set client credentials flow.
+     * @param flow - &l:OAuthFlowObject;.
+     * @return
+     */
+    SSOBuilder& setClientCredentialsFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->clientCredentials = flow;
+      return *this;
+    }
+
+    /**
+     * Set authorization code flow.
+     * @param flow - &l:OAuthFlowObject;.
+     * @return
+     */
+    SSOBuilder& setAuthorizationCodeFlow(const std::shared_ptr<OAuthFlowObject>& flow){
+      getFlows()->authorizationCode = flow;
+      return *this;
+    }
+
+    /**
+     * Set open id connect url.
+     * @param openIdConnectUrl
+     * @return
+     */
+    SSOBuilder& setOpenIdConnectUrl(const String& openIdConnectUrl) {
+      m_openIdConnectUrl = openIdConnectUrl;
+      return *this;
+    }
+
+    /**
+     * Build SecuritySchemeObject.
+     * @return - `std::shared_ptr` to &l:SecuritySchemeObject;.
      */
     std::shared_ptr<SecuritySchemeObject> build() {
       auto sso = SecuritySchemeObject::createShared();
@@ -458,7 +522,7 @@ public:
   };
 
   /**
-   * OAuthFlowObject Builder
+   * OAuthFlowObject Builder.
    */
   class OAFOBuilder {
    private:
@@ -475,26 +539,51 @@ public:
     }
 
    public:
-    OAFOBuilder& setAuthorizationUrl(const String &authorization_url) {
-      m_authorizationUrl = authorization_url;
+
+    /**
+     * Set authorization url.
+     * @param authorizationUrl
+     * @return
+     */
+    OAFOBuilder& setAuthorizationUrl(const String& authorizationUrl) {
+      m_authorizationUrl = authorizationUrl;
       return *this;
     }
-    OAFOBuilder& setTokenUrl(const String &token_url) {
-      m_tokenUrl = token_url;
+
+    /**
+     * Set token url.
+     * @param tokenUrl
+     * @return
+     */
+    OAFOBuilder& setTokenUrl(const String& tokenUrl) {
+      m_tokenUrl = tokenUrl;
       return *this;
     }
-    OAFOBuilder& setRefreshUrl(const String &refresh_url) {
-      m_refreshUrl = refresh_url;
+
+    /**
+     * Set refresh url.
+     * @param refreshUrl
+     * @return
+     */
+    OAFOBuilder& setRefreshUrl(const String& refreshUrl) {
+      m_refreshUrl = refreshUrl;
       return *this;
     }
-    OAFOBuilder& addScope(const String &name, const String &scope){
+
+    /**
+     * add scope.
+     * @param name
+     * @param scope
+     * @return
+     */
+    OAFOBuilder& addScope(const String& name, const String& scope){
       getScopes()->at(name) = scope;
       return *this;
     }
 
     /**
-     * Build OAuthFlowObject
-     * @return
+     * Build OAuthFlowObject.
+     * @return - &l:OAuthFlowObject;.
      */
     std::shared_ptr<OAuthFlowObject> build() {
       auto oafo = OAuthFlowObject::createShared();
@@ -515,6 +604,8 @@ public:
     std::shared_ptr<DocumentHeader> m_header;
     std::shared_ptr<std::list<std::shared_ptr<Server>>> m_servers;
     std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecuritySchemeObject>>> m_ssos;
+
+  private:
 
     std::shared_ptr<DocumentHeader> getHeader() {
       if(!m_header) {
@@ -665,11 +756,11 @@ public:
     }
 
     /**
-     * Add &l::SecuritySchemeObject
-     *  When you are using the AUTHENTICATION() Endpoint-Macro you must add an SecuritySchemeObject (https://swagger.io/specification/#securitySchemeObject)
-     * For basic-authentication you can use the default Basic-Authorization-SSO like this
-     * For more complex authentication schemes you can use the oatpp::swagger::DocumentInfo::SSOBuilder builder
-     * Don't forget to add info->addAuthorizationRequirement(name) to your ENDPOINT_INFO() macro!
+     * Add &l:SecuritySchemeObject;.
+     * When you are using the `AUTHENTICATION()` Endpoint-Macro you must add an [SecuritySchemeObject](https://swagger.io/specification/#securitySchemeObject).
+     * For basic-authentication you can use the default &id:oatpp::swagger::DocumentInfo::SSOBuilder::DefaultBasicAuthorizationSSO;.
+     * For more complex authentication schemes you can use the &id:oatpp::swagger::DocumentInfo::SSOBuilder; builder.
+     * Don't forget to add `info->addSecurityRequirement(name)` to your `ENDPOINT_INFO()` macro!
      * @param name
      * @param sso
      * @return - &l:DocumentInfo::Builder;.

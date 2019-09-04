@@ -40,8 +40,6 @@ namespace oatpp { namespace swagger { namespace oas3 {
 class Generator {
 public:
 
-  static const char* TAG;
-
   /**
    * Convenience typedef for &id:oatpp::web::server::api::Endpoint;.
    */
