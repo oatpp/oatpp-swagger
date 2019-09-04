@@ -64,7 +64,7 @@ public:
   TestController(const std::shared_ptr<ObjectMapper>& objectMapper)
     : oatpp::web::server::api::ApiController(objectMapper)
   {
-    m_authorizationHandler = std::make_shared<MyBasicAuthorizationHandler>();
+    m_defaultAuthorizationHandler = std::make_shared<MyBasicAuthorizationHandler>();
   }
 public:
 

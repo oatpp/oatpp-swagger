@@ -244,7 +244,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
   
 void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSSOs &usedSSOs) {
   
-  auto info = endpoint->info;
+  auto info = endpoint->info();
   
   if(info) {
     
@@ -340,8 +340,8 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
   while (curr != nullptr) {
     auto endpoint = curr->getData();
     
-    if(endpoint->info) {
-      oatpp::String path = endpoint->info->path;
+    if(endpoint->info()) {
+      oatpp::String path = endpoint->info()->path;
       if(path->getSize() == 0) {
         continue;
       }
