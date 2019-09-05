@@ -30,13 +30,42 @@ DTO_INIT(UserDto, Object)
 
 #include OATPP_CODEGEN_END(DTO)
 
+// Handler //-------------------------------------------------------------------------
+
+class MyAuthorizationObject : public oatpp::web::server::handler::AuthorizationObject {
+ public:
+
+  MyAuthorizationObject(v_int64 pId, const oatpp::String& user)
+      : id(pId)
+      , userName(user)
+  {}
+
+  v_int64 id;
+  oatpp::String userName;
+
+};
+
+class MyBasicAuthorizationHandler : public oatpp::web::server::handler::BasicAuthorizationHandler {
+ public:
+
+  std::shared_ptr<AuthorizationObject> authorize(const oatpp::String& userId, const oatpp::String& password) override {
+    if(userId == "foo" && password == "bar") {
+      return std::make_shared<MyAuthorizationObject>(1337, userId);
+    }
+    return nullptr;
+  }
+
+};
+
 // Controller //----------------------------------------------------------------------
 
 class TestController : public oatpp::web::server::api::ApiController {
 public:
   TestController(const std::shared_ptr<ObjectMapper>& objectMapper)
     : oatpp::web::server::api::ApiController(objectMapper)
-  {}
+  {
+    m_defaultAuthorizationHandler = std::make_shared<MyBasicAuthorizationHandler>();
+  }
 public:
 
   static std::shared_ptr<TestController> createShared(const std::shared_ptr<ObjectMapper>& objectMapper){
@@ -123,6 +152,21 @@ public:
   ENDPOINT("DELETE", "demo/api/users/{userId}", deleteUser,
            PATH(Int32, userId)) {
     return createResponse(Status::CODE_200, "User successfully deleted");
+  }
+
+  ENDPOINT_INFO(deleteAllUsers) {
+    info->summary = "Deletes all users";
+    info->addResponse<String>(Status::CODE_200, "text/plain");
+    info->addResponse<String>(Status::CODE_401, "text/plain");
+    info->addSecurityRequirement("basic_auth");
+  }
+  ENDPOINT("DELETE", "demo/api/users", deleteAllUsers,
+           AUTHORIZATION(std::shared_ptr<MyAuthorizationObject>, authorization)) {
+    if(authorization->userName == "john" && authorization->id == 1337) {
+      return createResponse(Status::CODE_200, "User successfully deleted");
+    } else {
+      return createResponse(Status::CODE_201, "Username or password invalid");
+    }
   }
 
   /**

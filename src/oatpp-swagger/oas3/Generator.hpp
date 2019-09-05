@@ -59,6 +59,8 @@ public:
   
   typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
 
+  typedef std::unordered_map<oatpp::String, bool> UsedSecuritySchemes;
+
 private:
   static void addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
                                         Endpoint::Info::Params& params,
@@ -72,20 +74,24 @@ private:
 
   static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes);
+  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
   
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes);
-  
+  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+
+  static SecurityScheme::ObjectWrapper generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
+
   static void decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static void decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
-  static Components::ObjectWrapper generateComponents(const UsedTypes& decomposedTypes);
+  static Components::ObjectWrapper generateComponents(const UsedTypes &decomposedTypes,
+                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
+                                                      UsedSecuritySchemes &usedSecuritySchemes);
 
 public:
 
