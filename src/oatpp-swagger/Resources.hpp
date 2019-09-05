@@ -113,7 +113,7 @@ public:
   /**
    * Get streamed resource by filename.
    * @param filename - name of the resource file.
-   * @return - std::shared_ptr<&id:oatpp::swagger::Resources::ReadCallback;> containing resource binary data stream.
+   * @return - `std::shared_ptr` to &id:oatpp::data::stream::ReadCallback; containing resource binary data stream."
    */
   std::shared_ptr<ReadCallback> getResourceStream(const oatpp::String& filename);
 
