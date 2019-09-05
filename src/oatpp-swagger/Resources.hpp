@@ -27,8 +27,10 @@
 
 #include "oatpp/core/Types.hpp"
 #include "oatpp/core/data/stream/ChunkedBuffer.hpp"
+#include "oatpp/core/data/stream/FileStream.hpp"
 
 #include <unordered_map>
+
 
 namespace oatpp { namespace swagger {
 
@@ -47,7 +49,7 @@ private:
   class ReadCallback : public oatpp::data::stream::ReadCallback {
    private:
     oatpp::String m_file;
-    void* m_stream;
+    oatpp::data::stream::FileInputStream m_stream;
 
    public:
 
@@ -111,7 +113,7 @@ public:
   /**
    * Get streamed resource by filename.
    * @param filename - name of the resource file.
-   * @return - std::shared_ptr<&id:ReadCallback;> containing resource binary data stream.
+   * @return - std::shared_ptr<&id:oatpp::swagger::Resources::ReadCallback;> containing resource binary data stream.
    */
   std::shared_ptr<ReadCallback> getResourceStream(const oatpp::String& filename);
 

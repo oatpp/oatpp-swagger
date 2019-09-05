@@ -83,13 +83,9 @@ oatpp::String Resources::getResource(const oatpp::String& filename) {
 }
 
 std::shared_ptr<Resources::ReadCallback> Resources::getResourceStream(const oatpp::String &filename) {
-  return std::make_shared<ReadCallback>(m_resDir + filename);
-}
-
-Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file) {
-  // Using the c API for a more convenient file-API then ifstream-API
-  m_stream = fopen(file->c_str(), "rb");
-  if(m_stream == nullptr) {
+  try {
+    return std::make_shared<ReadCallback>(m_resDir + filename);
+  } catch(std::runtime_error &e) {
     throw std::runtime_error(
         "[oatpp::swagger::Resources::getResource(...)]: Resource file not found. "
         "Please make sure: "
@@ -100,13 +96,16 @@ Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file) 
   }
 }
 
+Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file), m_stream(file->c_str()) {
+
+}
+
 data::v_io_size Resources::ReadCallback::read(void *buffer, data::v_io_size count) {
-  // By using the c-API, the read-callback becomes one single line of code:
-  return fread(buffer, 1, count, (FILE*)m_stream);
+  return m_stream.read(buffer, count);
 }
 
 Resources::ReadCallback::~ReadCallback() {
-  fclose((FILE*)m_stream);
+
 }
 
 }}
