@@ -23,12 +23,12 @@
  ***************************************************************************/
 
 #include "Resources.hpp"
-
+#include <stdio.h>
 #include <fstream>
 
 namespace oatpp { namespace swagger {
   
-Resources::Resources(const oatpp::String& resDir) {
+Resources::Resources(const oatpp::String& resDir, bool streaming) {
   
   if(!resDir || resDir->getSize() == 0) {
     throw std::runtime_error("[oatpp::swagger::Resources::Resources()]: Invalid resDir path. Please specify full path to oatpp-swagger/res folder");
@@ -38,6 +38,8 @@ Resources::Resources(const oatpp::String& resDir) {
   if(m_resDir->getData()[m_resDir->getSize() - 1] != '/') {
     m_resDir = m_resDir + "/";
   }
+
+  m_streaming = streaming;
 }
   
 void Resources::cacheResource(const char* fileName) {
@@ -66,6 +68,7 @@ oatpp::String Resources::loadFromFile(const char* fileName) {
 }
   
 oatpp::String Resources::getResource(const oatpp::String& filename) {
+
   auto it = m_resources.find(filename);
   if(it != m_resources.end()) {
     return it->second;
@@ -78,6 +81,31 @@ oatpp::String Resources::getResource(const oatpp::String& filename) {
                            "3. You specified correct full path to oatpp-swagger/res folder"
                            );
 }
-  
-  
+
+std::shared_ptr<Resources::ReadCallback> Resources::getResourceStream(const oatpp::String &filename) {
+  try {
+    return std::make_shared<ReadCallback>(m_resDir + filename);
+  } catch(std::runtime_error &e) {
+    throw std::runtime_error(
+        "[oatpp::swagger::Resources::getResource(...)]: Resource file not found. "
+        "Please make sure: "
+        "1. You are using correct version of oatpp-swagger. "
+        "2. oatpp-swagger/res is not empty. "
+        "3. You specified correct full path to oatpp-swagger/res folder"
+    );
+  }
+}
+
+Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file), m_stream(file->c_str()) {
+
+}
+
+data::v_io_size Resources::ReadCallback::read(void *buffer, data::v_io_size count) {
+  return m_stream.read(buffer, count);
+}
+
+Resources::ReadCallback::~ReadCallback() {
+
+}
+
 }}
