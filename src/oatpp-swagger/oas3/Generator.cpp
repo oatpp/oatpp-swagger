@@ -338,7 +338,7 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
   while (curr != nullptr) {
     auto endpoint = curr->getData();
     
-    if(endpoint->info()) {
+    if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
       if(path->getSize() == 0) {
         continue;
