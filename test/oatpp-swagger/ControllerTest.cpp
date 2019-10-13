@@ -8,6 +8,7 @@
 
 #include "oatpp-swagger/Controller.hpp"
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "oatpp/core/data/stream/BufferStream.hpp"
 
 #include <iostream>
 
@@ -58,6 +59,8 @@ namespace {
 
 void ControllerTest::onRun() {
 
+  oatpp::data::stream::BufferOutputStream responseBuffer;
+
   // Create ObjectMapper
   auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
 
@@ -76,9 +79,10 @@ void ControllerTest::onRun() {
 
     // Get api json from swaggerController
     oatpp::data::stream::ChunkedBuffer stream;
+    stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->api();
-    response->send(&stream);
+    response->send(&stream, &responseBuffer);
 
     std::cout << stream.toString()->c_str() << "\n\n";
 
@@ -99,9 +103,10 @@ void ControllerTest::onRun() {
   { // index.html test
     // Get index.html from swaggerController
     oatpp::data::stream::ChunkedBuffer stream;
+    stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->getUIRoot();
-    response->send(&stream);
+    response->send(&stream, &responseBuffer);
 
     auto responseText = stream.toString();
     OATPP_LOGD(TAG, responseText->c_str());
