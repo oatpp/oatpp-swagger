@@ -100,7 +100,7 @@ Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file),
 
 }
 
-data::v_io_size Resources::ReadCallback::read(void *buffer, data::v_io_size count) {
+data::v_io_size Resources::ReadCallback::read(void *buffer, v_buff_size count) {
   return m_stream.read(buffer, count);
 }
 

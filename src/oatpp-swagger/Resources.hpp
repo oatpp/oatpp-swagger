@@ -56,7 +56,7 @@ private:
     ReadCallback(const oatpp::String& file);
     ~ReadCallback();
 
-    data::v_io_size read(void *buffer, data::v_io_size count) override;
+    data::v_io_size read(void *buffer, v_buff_size count) override;
 
   };
 
