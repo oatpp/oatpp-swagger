@@ -40,6 +40,7 @@ Resources::Resources(const oatpp::String& resDir, bool streaming) {
   }
 
   m_streaming = streaming;
+
 }
   
 void Resources::cacheResource(const char* fileName) {
@@ -96,16 +97,11 @@ std::shared_ptr<Resources::ReadCallback> Resources::getResourceStream(const oatp
   }
 }
 
-Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file), m_stream(file->c_str()) {
+Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file), m_stream(file->c_str())
+{}
 
-}
-
-data::v_io_size Resources::ReadCallback::read(void *buffer, v_buff_size count) {
-  return m_stream.read(buffer, count);
-}
-
-Resources::ReadCallback::~ReadCallback() {
-
+v_io_size Resources::ReadCallback::read(void *buffer, v_buff_size count, async::Action& action) {
+  return m_stream.read(buffer, count, action);
 }
 
 }}
