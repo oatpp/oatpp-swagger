@@ -82,7 +82,7 @@ void ControllerTest::onRun() {
     stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->api();
-    response->send(&stream, &responseBuffer);
+    response->send(&stream, &responseBuffer, nullptr);
 
     std::cout << stream.toString()->c_str() << "\n\n";
 
@@ -106,7 +106,7 @@ void ControllerTest::onRun() {
     stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->getUIRoot();
-    response->send(&stream, &responseBuffer);
+    response->send(&stream, &responseBuffer, nullptr);
 
     auto responseText = stream.toString();
     OATPP_LOGD(TAG, responseText->c_str());
