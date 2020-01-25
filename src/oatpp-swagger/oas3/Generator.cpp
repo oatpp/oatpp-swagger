@@ -74,44 +74,44 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
-  auto typeName = type->name;
-  if(typeName == oatpp::data::mapping::type::__class::String::CLASS_NAME){
+  auto classId = type->classId.id;
+  if(classId == oatpp::data::mapping::type::__class::String::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "string";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::Int32::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::Int32::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "integer";
     result->format = "int32";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::Int64::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::Int64::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "integer";
     result->format = "int64";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::Float32::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::Float32::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "number";
     result->format = "float";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::Float64::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::Float64::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "number";
     result->format = "double";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::Boolean::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::Boolean::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "boolean";
     return result;
-  } else if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id){
     return generateSchemaForTypeObject(type, linkSchema, usedTypes);
-  } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
     return generateSchemaForTypeList(type, linkSchema, usedTypes);
-  } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id){
     // TODO
   } else {
     auto result = Schema::createShared();
-    result->type = type->name;
+    result->type = type->classId.name;
     if(type->nameQualifier) {
       result->format = type->nameQualifier;
     }
@@ -181,11 +181,11 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
 
         OATPP_ASSERT(endpointInfo.body.type && "[oatpp-swagger::oas3::Generator::generateRequestBody()]: Error. Type should not be null.");
 
-        if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME) {
+        if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id) {
           body->content->put("application/json", mediaType);
-        } else if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME) {
+        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id) {
           body->content->put("application/json", mediaType);
-        } else if(endpointInfo.body.type->name == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME) {
+        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id) {
           body->content->put("application/json", mediaType);
         } else {
           body->content->put("text/plain", mediaType);
@@ -397,12 +397,12 @@ void Generator::decomposeMap(const oatpp::data::mapping::type::Type* type, UsedT
   
 void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeType()]: Error. Type should not be null.");
-  auto typeName = type->name;
-  if(typeName == oatpp::data::mapping::type::__class::AbstractObject::CLASS_NAME){
+  auto classId = type->classId.id;
+  if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id){
     decomposeObject(type, decomposedTypes);
-  } else if(typeName == oatpp::data::mapping::type::__class::AbstractList::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
     decomposeList(type, decomposedTypes);
-  } else if(typeName == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_NAME){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id){
     decomposeMap(type, decomposedTypes);
   }
 }
