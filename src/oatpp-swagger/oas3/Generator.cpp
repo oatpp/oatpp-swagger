@@ -26,6 +26,8 @@
 
 #include "oatpp/core/utils/ConversionUtils.hpp"
 
+#include <limits>
+
 namespace oatpp { namespace swagger { namespace oas3 {
 
 Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
@@ -79,15 +81,50 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
     auto result = Schema::createShared();
     result->type = "string";
     return result;
+  } else if(classId == oatpp::data::mapping::type::__class::Int8::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_int8>::min();
+    result->maximum = std::numeric_limits<v_int8>::max();
+    return result;
+  } else if(classId == oatpp::data::mapping::type::__class::UInt8::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint8>::min();
+    result->maximum = std::numeric_limits<v_uint8>::max();
+    return result;
+  } else if(classId == oatpp::data::mapping::type::__class::Int16::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_int16>::min();
+    result->maximum = std::numeric_limits<v_int16>::max();
+    return result;
+  } else if(classId == oatpp::data::mapping::type::__class::UInt16::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint16>::min();
+    result->maximum = std::numeric_limits<v_uint16>::max();
+    return result;
   } else if(classId == oatpp::data::mapping::type::__class::Int32::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "integer";
-    result->format = "int32";
+    result->minimum = std::numeric_limits<v_int32>::min();
+    result->maximum = std::numeric_limits<v_int32>::max();
+    return result;
+  } else if(classId == oatpp::data::mapping::type::__class::UInt32::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint32>::min();
+    result->maximum = std::numeric_limits<v_uint32>::max();
     return result;
   } else if(classId == oatpp::data::mapping::type::__class::Int64::CLASS_ID.id){
     auto result = Schema::createShared();
     result->type = "integer";
     result->format = "int64";
+    return result;
+  } else if(classId == oatpp::data::mapping::type::__class::UInt64::CLASS_ID.id){
+    auto result = Schema::createShared();
+    result->type = "integer";
     return result;
   } else if(classId == oatpp::data::mapping::type::__class::Float32::CLASS_ID.id){
     auto result = Schema::createShared();
@@ -250,6 +287,13 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     operation->operationId = info->name;
     operation->summary = info->summary;
     operation->description = info->description;
+
+    if(info->tags.size() > 0) {
+      operation->tags = operation->tags->createShared();
+      for(auto& tag : info->tags) {
+        operation->tags->pushBack(tag);
+      }
+    }
     
     if(oatpp::base::StrBuffer::equalsCI("get", info->method->c_str(), info->method->getSize())) {
       pathItem->operationGet = operation;

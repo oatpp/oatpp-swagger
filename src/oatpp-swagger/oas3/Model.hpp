@@ -291,6 +291,16 @@ class Schema : public oatpp::data::mapping::type::Object {
   DTO_FIELD(String, format);
 
   /**
+   * Minimum value.
+   */
+  DTO_FIELD(Int64, minimum);
+
+  /**
+   * Maximum value.
+   */
+  DTO_FIELD(Int64, maximum);
+
+  /**
    * Map of &id:oatpp::String; to &l:Schema;.
    */
   DTO_FIELD(Fields<Schema::ObjectWrapper>::ObjectWrapper, properties);

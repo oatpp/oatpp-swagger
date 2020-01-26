@@ -27,7 +27,7 @@
 namespace oatpp { namespace swagger {
   
 namespace __class {
-  const char* const Binary::CLASS_NAME = "string";
+const oatpp::data::mapping::type::ClassId Binary::CLASS_ID("string");
 }
   
 }}
