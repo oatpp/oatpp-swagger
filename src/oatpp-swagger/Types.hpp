@@ -41,14 +41,14 @@ namespace __class {
     /**
      * CLASS_NAME = `"string"`.
      */
-    static const char* const CLASS_NAME;
+    static const oatpp::data::mapping::type::ClassId CLASS_ID;
 
     /**
      * Get type information.
      * @return - &id:oatpp::data::mapping::type::Type;.
      */
     static oatpp::data::mapping::type::Type* getType(){
-      static oatpp::data::mapping::type::Type type(CLASS_NAME, "binary");
+      static oatpp::data::mapping::type::Type type(CLASS_ID, "binary");
       return &type;
     }
     
