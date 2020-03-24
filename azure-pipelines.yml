@@ -35,10 +35,10 @@ jobs:
         workingDirectory: build
 
   - job: macOS
-    displayName: 'Build - macOS-10.13'
+    displayName: 'Build - macOS'
     continueOnError: false
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.14'
     workspace:
       clean: all
     steps:
