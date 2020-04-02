@@ -124,8 +124,8 @@ public:
 
   ENDPOINT_INFO(getUserById) {
     info->summary = "Get one User by userId";
-    info->addResponse<UserDto::ObjectWrapper>(Status::CODE_200, "application/json");
-    info->addResponse<String>(Status::CODE_404, "text/plain");
+    info->addResponse<UserDto::ObjectWrapper>(Status::CODE_200, "application/json", "User found for id");
+    info->addResponse<String>(Status::CODE_404, "text/plain", "User not found");
     info->pathParams.add("someId", String::Class::getType()).description = "Some ID:)";
     info->pathParams["userId"].description = "User Id";
   }
