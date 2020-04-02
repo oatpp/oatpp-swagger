@@ -252,7 +252,7 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
       mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedTypes);
       
       auto response = OperationResponse::createShared();
-      response->description = it->first.description;
+      response->description = it->second.description.get() == nullptr ? it->first.description : it->second.description;
       response->content = response->content->createShared();
       response->content->put(it->second.contentType, mediaType);
       responses->put(oatpp::utils::conversion::int32ToStr(it->first.code), response);
