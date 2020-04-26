@@ -15,7 +15,7 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
-class HelloDto : public oatpp::data::mapping::type::Object {
+class HelloDto : public oatpp::Object {
 
   DTO_INIT(HelloDto, Object)
 
@@ -25,7 +25,7 @@ class HelloDto : public oatpp::data::mapping::type::Object {
 
 };
 
-class MessageDto : public oatpp::data::mapping::type::Object {
+class MessageDto : public oatpp::Object {
 
   DTO_INIT(MessageDto, Object)
 
@@ -62,7 +62,7 @@ public:
    */
   ENDPOINT_INFO(Root) {
     info->summary = "Example 'Root' endpoint. Without any params";
-    info->addResponse<HelloDto::ObjectWrapper>(Status::CODE_200, "application/json");
+    info->addResponse<HelloDto>(Status::CODE_200, "application/json");
   }
   ENDPOINT_ASYNC("GET", "/", Root) {
 
@@ -114,8 +114,8 @@ public:
    */
   ENDPOINT_INFO(EchoDtoBody) {
     info->summary = "Echo endpoint. Echo body content Serialized/Deserialized as DTO";
-    info->addConsumes<MessageDto::ObjectWrapper>("application/json");
-    info->addResponse<MessageDto::ObjectWrapper>(Status::CODE_200, "application/json");
+    info->addConsumes<MessageDto>("application/json");
+    info->addResponse<MessageDto>(Status::CODE_200, "application/json");
   }
   ENDPOINT_ASYNC("POST", "/body/dto", EchoDtoBody) {
 

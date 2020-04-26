@@ -239,9 +239,9 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
 
 }
 
-Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
+Generator::Fields<OperationResponse>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
-  auto responses = Fields<OperationResponse::ObjectWrapper>::createShared();
+  auto responses = Fields<OperationResponse>::createShared();
   
   if(endpointInfo.responses.size() > 0) {
     
@@ -353,14 +353,14 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
           if (sec.second == nullptr) {
 
             // who ever came up to define "security" as an array of objects of array of strings
-            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
+            auto fields = Fields<Components::List<String>>::createShared();
             fields->put(sec.first, Components::List<String>::createShared());
             operation->security->pushBack(fields);
 
           } else {
 
-            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
-            auto sro = Components::List<String>::createShared();
+            auto fields = Fields<List<String>>::createShared();
+            auto sro = List<String>::createShared();
             for (const auto &sr : *sec.second) {
               sro->pushBack(sr);
             }

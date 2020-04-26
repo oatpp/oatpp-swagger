@@ -50,12 +50,12 @@ public:
    */
   typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
 
-  typedef oatpp::data::mapping::type::List<PathItemParameter::ObjectWrapper> PathItemParameters;
+  typedef oatpp::data::mapping::type::List<PathItemParameter> PathItemParameters;
   
   template <class Value>
   using Fields = oatpp::data::mapping::type::ListMap<String, Value>;
   
-  typedef Fields<PathItem::ObjectWrapper> Paths;
+  typedef Fields<PathItem> Paths;
   
   typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
 
@@ -73,7 +73,7 @@ private:
   static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
 
   static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static Fields<OperationResponse::ObjectWrapper>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static Fields<OperationResponse>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
   
   /*
