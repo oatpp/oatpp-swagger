@@ -208,7 +208,7 @@ class ServerVariable : public oatpp::Object {
         
         result->enumValues = List<String>::createShared();
         for(const auto &it : *model->enumValues) {
-          result->enumValues->pushBack(it);
+          result->enumValues->push_back(it);
         }
         
       }
@@ -261,7 +261,7 @@ class Server : public oatpp::Object {
         result->variables = Fields<ServerVariable>::createShared();
 
         for(const auto &it : *model->variables){
-          result->variables->put(it.first, ServerVariable::createFromBaseModel(it.second));
+          result->variables[it.first] = ServerVariable::createFromBaseModel(it.second);
         }
 
       }

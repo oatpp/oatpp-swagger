@@ -50,10 +50,10 @@ public:
    */
   typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
 
-  typedef oatpp::data::mapping::type::List<PathItemParameter> PathItemParameters;
+  typedef oatpp::List<PathItemParameter> PathItemParameters;
   
   template <class Value>
-  using Fields = oatpp::data::mapping::type::ListMap<String, Value>;
+  using Fields = oatpp::Fields<Value>;
   
   typedef Fields<PathItem> Paths;
   
@@ -62,7 +62,7 @@ public:
   typedef std::unordered_map<oatpp::String, bool> UsedSecuritySchemes;
 
 private:
-  static void addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
+  static void addParamsToParametersList(const PathItemParameters& paramsList,
                                         Endpoint::Info::Params& params,
                                         const oatpp::String& inType,
                                         UsedTypes& usedTypes);
@@ -73,13 +73,13 @@ private:
   static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
 
   static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static Fields<OperationResponse>::ObjectWrapper generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static Fields<OperationResponse> generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
   
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  static Paths::ObjectWrapper generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+  static Paths generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
 
   static SecurityScheme::ObjectWrapper generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
