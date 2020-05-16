@@ -44,9 +44,9 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::
   } else {
     
     result->type = "object";
-    result->properties = result->properties->createShared();
+    result->properties = oatpp::Fields<Schema>::createShared();
     
-    auto properties = type->properties;
+    auto properties = type->propertiesGetter();
     if(properties->getList().size() == 0) {
       type->creator(); // init type by creating first instance of that type
     }
@@ -54,7 +54,7 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::
     auto it = properties->getList().begin();
     while (it != properties->getList().end()) {
       auto p = *it ++;
-      result->properties->put(p->name, generateSchemaForType(p->type, true, usedTypes));
+      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes);
     }
     
     return result;
@@ -144,7 +144,7 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
     return generateSchemaForTypeObject(type, linkSchema, usedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
     return generateSchemaForTypeList(type, linkSchema, usedTypes);
-  } else if(classId == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id){
     // TODO
   } else {
     auto result = Schema::createShared();
@@ -159,7 +159,7 @@ Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mappin
   
 }
 
-void Generator::addParamsToParametersList(const PathItemParameters::ObjectWrapper& paramsList,
+void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
                                           Endpoint::Info::Params& params,
                                           const oatpp::String& inType,
                                           UsedTypes& usedTypes)
@@ -175,7 +175,7 @@ void Generator::addParamsToParametersList(const PathItemParameters::ObjectWrappe
     parameter->required = param.required;
     parameter->deprecated = param.deprecated;
     parameter->schema = generateSchemaForType(param.type, true, usedTypes);
-    paramsList->pushBack(parameter);
+    paramsList->push_back(parameter);
   }
 
 }
@@ -186,7 +186,7 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
 
     auto body = RequestBody::createShared();
     body->description = "request body";
-    body->content = body->content->createShared();
+    body->content = body->content.createShared();
     
     auto it = endpointInfo.consumes.begin();
     while (it != endpointInfo.consumes.end()) {
@@ -194,7 +194,7 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
       auto mediaType = MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedTypes);
       
-      body->content->put(it->contentType, mediaType);
+      body->content[it->contentType] = mediaType;
       
       it++;
     }
@@ -211,21 +211,21 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
       auto mediaType = MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
       
-      body->content = body->content->createShared();
+      body->content = oatpp::Fields<MediaTypeObject>({});
       if(endpointInfo.bodyContentType != nullptr) {
-        body->content->put(endpointInfo.bodyContentType, mediaType);
+        body->content[endpointInfo.bodyContentType] = mediaType;
       } else {
 
         OATPP_ASSERT(endpointInfo.body.type && "[oatpp-swagger::oas3::Generator::generateRequestBody()]: Error. Type should not be null.");
 
         if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id) {
-          body->content->put("application/json", mediaType);
+          body->content["application/json"] = mediaType;
         } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id) {
-          body->content->put("application/json", mediaType);
-        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id) {
-          body->content->put("application/json", mediaType);
+          body->content["application/json"] = mediaType;
+        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
+          body->content["application/json"] = mediaType;
         } else {
-          body->content->put("text/plain", mediaType);
+          body->content["text/plain"] = mediaType;
         }
       }
 
@@ -239,9 +239,9 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
 
 }
 
-Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
+Generator::Fields<OperationResponse> Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
   
-  auto responses = Fields<OperationResponse::ObjectWrapper>::createShared();
+  auto responses = Fields<OperationResponse>::createShared();
   
   if(endpointInfo.responses.size() > 0) {
     
@@ -253,9 +253,9 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
       
       auto response = OperationResponse::createShared();
       response->description = it->second.description.get() == nullptr ? it->first.description : it->second.description;
-      response->content = response->content->createShared();
-      response->content->put(it->second.contentType, mediaType);
-      responses->put(oatpp::utils::conversion::int32ToStr(it->first.code), response);
+      response->content = oatpp::Fields<MediaTypeObject>({});
+      response->content[it->second.contentType] = mediaType;
+      responses[oatpp::utils::conversion::int32ToStr(it->first.code)] = response;
       
       it++;
     }
@@ -267,9 +267,9 @@ Generator::Fields<OperationResponse::ObjectWrapper>::ObjectWrapper Generator::ge
   
     auto response = OperationResponse::createShared();
     response->description = "success";
-    response->content = response->content->createShared();
-    response->content->put("text/plain", mediaType);
-    responses->put("200", response);
+    response->content = oatpp::Fields<MediaTypeObject>({});
+    response->content["text/plain"] = mediaType;
+    responses["200"] = response;
   
   }
   
@@ -289,9 +289,9 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     operation->description = info->description;
 
     if(info->tags.size() > 0) {
-      operation->tags = operation->tags->createShared();
+      operation->tags = oatpp::List<String>({});
       for(auto& tag : info->tags) {
-        operation->tags->pushBack(tag);
+        operation->tags->push_back(tag);
       }
     }
     
@@ -318,7 +318,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
 
     if(!operation->parameters) {
 
-      operation->parameters = operation->parameters->createShared();
+      operation->parameters = oatpp::List<PathItemParameter>({});
 
       Endpoint::Info::Params filteredHeaders;
       if(!info->headers.getOrder().empty()) {
@@ -345,7 +345,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
 
       if (!info->securityRequirements.empty()) {
 
-        operation->security = operation->security->createShared();
+        operation->security = oatpp::List<Fields<List<String>>>({});
 
         for (const auto &sec : info->securityRequirements) {
 
@@ -353,19 +353,19 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
           if (sec.second == nullptr) {
 
             // who ever came up to define "security" as an array of objects of array of strings
-            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
-            fields->put(sec.first, Components::List<String>::createShared());
-            operation->security->pushBack(fields);
+            auto fields = Fields<oatpp::List<String>>({});
+            fields[sec.first] = oatpp::List<String>({});
+            operation->security->push_back(fields);
 
           } else {
 
-            auto fields = Fields<Components::List<String>::ObjectWrapper>::createShared();
-            auto sro = Components::List<String>::createShared();
+            auto fields = Fields<List<String>>::createShared();
+            auto sro = List<String>::createShared();
             for (const auto &sr : *sec.second) {
-              sro->pushBack(sr);
+              sro->push_back(sr);
             }
-            fields->put(sec.first, sro);
-            operation->security->pushBack(fields);
+            fields[sec.first] = sro;
+            operation->security->push_back(fields);
 
           }
         }
@@ -374,7 +374,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   }
 }
   
-Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
+Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
   
   auto result = Paths::createShared();
   
@@ -391,10 +391,9 @@ Generator::Paths::ObjectWrapper Generator::generatePaths(const std::shared_ptr<E
         path = "/" + path;
       }
 
-      auto pathItem = result->get(path, nullptr);
+      auto& pathItem = result[path];
       if(!pathItem) {
         pathItem = PathItem::createShared();
-        result->put(path, pathItem);
       }
 
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
@@ -418,7 +417,7 @@ void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, Us
   
   decomposedTypes[type->nameQualifier] = type;
   
-  auto properties = type->properties;
+  auto properties = type->propertiesGetter();
   if(properties->getList().size() == 0) {
     type->creator(); // init type by creating first instance of that type
   }
@@ -446,7 +445,7 @@ void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, Used
     decomposeObject(type, decomposedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
     decomposeList(type, decomposedTypes);
-  } else if(classId == oatpp::data::mapping::type::__class::AbstractListMap::CLASS_ID.id){
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id){
     decomposeMap(type, decomposedTypes);
   }
 }
@@ -471,20 +470,20 @@ Components::ObjectWrapper Generator::generateComponents(const UsedTypes &decompo
                                                         UsedSecuritySchemes &usedSecuritySchemes) {
   
   auto result = Components::createShared();
-  result->schemas = result->schemas->createShared();
+  result->schemas = oatpp::Fields<Schema>({});
   
   auto it = decomposedTypes.begin();
   while (it != decomposedTypes.end()) {
     UsedTypes schemas; ///< dummy
-    result->schemas->put(it->first, generateSchemaForType(it->second, false, schemas));
+    result->schemas[it->first] = generateSchemaForType(it->second, false, schemas);
     it ++;
   }
 
   if(securitySchemes) {
-    result->securitySchemes = result->securitySchemes->createShared();
+    result->securitySchemes = oatpp::Fields<SecurityScheme>({});
     for (const auto &ss : usedSecuritySchemes) {
         OATPP_ASSERT(securitySchemes->find(ss.first) != securitySchemes->end() && "[oatpp-swagger::oas3::Generator::generateComponents()]: Error. Requested unknown security requirement.");
-        result->securitySchemes->put(ss.first, generateSecurityScheme(securitySchemes->at(ss.first)));
+        result->securitySchemes[ss.first] = generateSecurityScheme(securitySchemes->at(ss.first));
     }
   }
 
@@ -498,10 +497,10 @@ Document::ObjectWrapper Generator::generateDocument(const std::shared_ptr<oatpp:
   document->info = Info::createFromBaseModel(docInfo->header);
   
   if(docInfo->servers) {
-    document->servers = document->servers->createShared();
+    document->servers = oatpp::List<Server>({});
 
     for(const auto &it : *docInfo->servers) {
-      document->servers->pushBack(Server::createFromBaseModel(it));
+      document->servers->push_back(Server::createFromBaseModel(it));
     }
 
   }
@@ -530,50 +529,50 @@ SecurityScheme::ObjectWrapper Generator::generateSecurityScheme(const std::share
   if(ss->flows) {
     oasSS->flows = oasSS->flows->createShared();
     if(ss->flows->implicit) {
-      oasSS->flows->implicit = oasSS->flows->implicit->createShared();
+      oasSS->flows->implicit = OAuthFlow::createShared();
       oasSS->flows->implicit->tokenUrl = ss->flows->implicit->tokenUrl;
       oasSS->flows->implicit->refreshUrl = ss->flows->implicit->refreshUrl;
       oasSS->flows->implicit->authorizationUrl = ss->flows->implicit->authorizationUrl;
       if(ss->flows->implicit->scopes) {
-        oasSS->flows->implicit->scopes->createShared();
+        oasSS->flows->implicit->scopes = oatpp::Fields<String>({});
         for(const auto &scope : *ss->flows->implicit->scopes) {
-          oasSS->flows->implicit->scopes->put(scope.first, scope.second);
+          oasSS->flows->implicit->scopes[scope.first] = scope.second;
         }
       }
     }
     if(ss->flows->password) {
-      oasSS->flows->password = oasSS->flows->password->createShared();
+      oasSS->flows->password = OAuthFlow::createShared();
       oasSS->flows->password->tokenUrl = ss->flows->password->tokenUrl;
       oasSS->flows->password->refreshUrl = ss->flows->password->refreshUrl;
       oasSS->flows->password->authorizationUrl = ss->flows->password->authorizationUrl;
       if(ss->flows->password->scopes) {
-        oasSS->flows->password->scopes->createShared();
+        oasSS->flows->password->scopes = oatpp::Fields<String>({});
         for(const auto &scope : *ss->flows->password->scopes) {
-          oasSS->flows->password->scopes->put(scope.first, scope.second);
+          oasSS->flows->password->scopes[scope.first] = scope.second;
         }
       }
     }
     if(ss->flows->clientCredentials) {
-      oasSS->flows->clientCredentials = oasSS->flows->clientCredentials->createShared();
+      oasSS->flows->clientCredentials = OAuthFlow::createShared();
       oasSS->flows->clientCredentials->tokenUrl = ss->flows->clientCredentials->tokenUrl;
       oasSS->flows->clientCredentials->refreshUrl = ss->flows->clientCredentials->refreshUrl;
       oasSS->flows->clientCredentials->authorizationUrl = ss->flows->clientCredentials->authorizationUrl;
       if(ss->flows->clientCredentials->scopes) {
-        oasSS->flows->clientCredentials->scopes->createShared();
+        oasSS->flows->clientCredentials->scopes = oatpp::Fields<String>({});
         for(const auto &scope : *ss->flows->clientCredentials->scopes) {
-          oasSS->flows->clientCredentials->scopes->put(scope.first, scope.second);
+          oasSS->flows->clientCredentials->scopes[scope.first] = scope.second;
         }
       }
     }
     if(ss->flows->authorizationCode) {
-      oasSS->flows->authorizationCode = oasSS->flows->authorizationCode->createShared();
+      oasSS->flows->authorizationCode = OAuthFlow::createShared();
       oasSS->flows->authorizationCode->tokenUrl = ss->flows->authorizationCode->tokenUrl;
       oasSS->flows->authorizationCode->refreshUrl = ss->flows->authorizationCode->refreshUrl;
       oasSS->flows->authorizationCode->authorizationUrl = ss->flows->authorizationCode->authorizationUrl;
       if(ss->flows->authorizationCode->scopes) {
-        oasSS->flows->authorizationCode->scopes->createShared();
+        oasSS->flows->authorizationCode->scopes = oatpp::Fields<String>({});
         for(const auto &scope : *ss->flows->authorizationCode->scopes) {
-          oasSS->flows->authorizationCode->scopes->put(scope.first, scope.second);
+          oasSS->flows->authorizationCode->scopes[scope.first] = scope.second;
         }
       }
     }
