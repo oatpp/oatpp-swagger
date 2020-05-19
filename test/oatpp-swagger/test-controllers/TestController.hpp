@@ -17,14 +17,24 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
+ENUM(HelloEnum, v_int16,
+     VALUE(V1, 10, "value-1", "description-1"),
+     VALUE(V2, 20, "value-2", "description-2"),
+     VALUE(V3, 30, "value-3", "description-3"),
+     VALUE(V4, 40, "value-4", "description-4"),
+     VALUE(V5, 50, "value-5", "description-5")
+)
+
 class UserDto : public oatpp::Object {
 
-DTO_INIT(UserDto, Object)
+  DTO_INIT(UserDto, Object)
 
   DTO_FIELD(Int32, id);
   DTO_FIELD(String, firstName, "first-name");
   DTO_FIELD(String, lastName, "last-name");
   DTO_FIELD(List<String>, friends) = List<String>::createShared();
+
+  DTO_FIELD(Enum<HelloEnum>, helloEnum);
 
 };
 

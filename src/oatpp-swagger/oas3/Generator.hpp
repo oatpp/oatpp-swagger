@@ -40,6 +40,8 @@ namespace oatpp { namespace swagger { namespace oas3 {
 class Generator {
 public:
 
+  typedef oatpp::data::mapping::type::Type Type;
+
   /**
    * Convenience typedef for &id:oatpp::web::server::api::Endpoint;.
    */
@@ -57,7 +59,7 @@ public:
   
   typedef Fields<PathItem> Paths;
   
-  typedef std::unordered_map<oatpp::String, const oatpp::data::mapping::type::Type*> UsedTypes;
+  typedef std::unordered_map<oatpp::String, const Type*> UsedTypes;
 
   typedef std::unordered_map<oatpp::String, bool> UsedSecuritySchemes;
 
@@ -68,9 +70,13 @@ private:
                                         UsedTypes& usedTypes);
 private:
 
-  static Schema::ObjectWrapper generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
-  static Schema::ObjectWrapper generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
-  static Schema::ObjectWrapper generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static oatpp::String getEnumSchemaName(const Type* type);
+
+  static Schema::ObjectWrapper generateSchemaForSimpleType(const Type* type, Type::Property* property = nullptr);
+  static Schema::ObjectWrapper generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static Schema::ObjectWrapper generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static Schema::ObjectWrapper generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
+  static Schema::ObjectWrapper generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
 
   static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   static Fields<OperationResponse> generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
@@ -83,10 +89,11 @@ private:
 
   static SecurityScheme::ObjectWrapper generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
-  static void decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
-  static void decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
-  static void decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
-  static void decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes);
+  static void decomposeObject(const Type* type, UsedTypes& decomposedTypes);
+  static void decomposeList(const Type* type, UsedTypes& decomposedTypes);
+  static void decomposeMap(const Type* type, UsedTypes& decomposedTypes);
+  static void decomposeEnum(const Type* type, UsedTypes& decomposedTypes);
+  static void decomposeType(const Type* type, UsedTypes& decomposedTypes);
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
   static Components::ObjectWrapper generateComponents(const UsedTypes &decomposedTypes,

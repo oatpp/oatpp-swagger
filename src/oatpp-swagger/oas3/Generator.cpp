@@ -25,44 +25,117 @@
 #include "Generator.hpp"
 
 #include "oatpp/core/utils/ConversionUtils.hpp"
+#include "oatpp/core/data/stream/BufferStream.hpp"
 
 #include <limits>
 
 namespace oatpp { namespace swagger { namespace oas3 {
 
-Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
+oatpp::String Generator::getEnumSchemaName(const Type* type) {
+
+  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::AbstractPolymorphicDispatcher*>(
+    type->polymorphicDispatcher
+  );
+
+  Type* interType = polymorphicDispatcher->getInterpretationType();
+
+  data::stream::BufferOutputStream stream;
+  stream << type->nameQualifier << "(" << interType->classId.name << ")";
+  return stream.toString();
+
+}
+
+Schema::ObjectWrapper Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property) {
+
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForSimpleType()]: Error. Type should not be null.");
+
+  auto result = Schema::createShared();
+
+  auto classId = type->classId.id;
+  if(classId == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
+    result->type = "string";
+  } else if(classId == oatpp::data::mapping::type::__class::Int8::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_int8>::min();
+    result->maximum = std::numeric_limits<v_int8>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::UInt8::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint8>::min();
+    result->maximum = std::numeric_limits<v_uint8>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::Int16::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_int16>::min();
+    result->maximum = std::numeric_limits<v_int16>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::UInt16::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint16>::min();
+    result->maximum = std::numeric_limits<v_uint16>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::Int32::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_int32>::min();
+    result->maximum = std::numeric_limits<v_int32>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::UInt32::CLASS_ID.id) {
+    result->type = "integer";
+    result->minimum = std::numeric_limits<v_uint32>::min();
+    result->maximum = std::numeric_limits<v_uint32>::max();
+  } else if(classId == oatpp::data::mapping::type::__class::Int64::CLASS_ID.id) {
+    result->type = "integer";
+    result->format = "int64";
+  } else if(classId == oatpp::data::mapping::type::__class::UInt64::CLASS_ID.id) {
+    result->type = "integer";
+  } else if(classId == oatpp::data::mapping::type::__class::Float32::CLASS_ID.id) {
+    result->type = "number";
+    result->format = "float";
+  } else if(classId == oatpp::data::mapping::type::__class::Float64::CLASS_ID.id) {
+    result->type = "number";
+    result->format = "double";
+  } else if(classId == oatpp::data::mapping::type::__class::Boolean::CLASS_ID.id) {
+    result->type = "boolean";
+  } else {
+    result->type = type->classId.name;
+    if(type->nameQualifier) {
+      result->format = type->nameQualifier;
+    }
+  }
+
+  if(property != nullptr) {
+    if(!property->info.description.empty()) {
+      result->description = property->info.description.c_str();
+    }
+  }
+
+  return result;
+
+}
+
+Schema::ObjectWrapper Generator::generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
 
   auto result = Schema::createShared();
   if(linkSchema) {
-  
+
     result->ref = oatpp::String("#/components/schemas/") + type->nameQualifier;
     usedTypes[type->nameQualifier] = type;
     return result;
-  
+
   } else {
-    
+
     result->type = "object";
     result->properties = oatpp::Fields<Schema>::createShared();
-    
+
     auto properties = type->propertiesGetter();
-    if(properties->getList().size() == 0) {
-      type->creator(); // init type by creating first instance of that type
+
+    for(auto* p : properties->getList()) {
+      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p);
     }
-    
-    auto it = properties->getList().begin();
-    while (it != properties->getList().end()) {
-      auto p = *it ++;
-      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes);
-    }
-    
+
     return result;
   }
-  
+
 }
-  
-Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
+
+Schema::ObjectWrapper Generator::generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeList()]: Error. Type should not be null.");
 
@@ -71,92 +144,58 @@ Schema::ObjectWrapper Generator::generateSchemaForTypeList(const oatpp::data::ma
   result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedTypes);
   return result;
 }
-  
-Schema::ObjectWrapper Generator::generateSchemaForType(const oatpp::data::mapping::type::Type* type, bool linkSchema, UsedTypes& usedTypes) {
+
+Schema::ObjectWrapper Generator::generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
+
+  if(linkSchema) {
+
+    auto result = Schema::createShared();
+    result->ref = oatpp::String("#/components/schemas/") + getEnumSchemaName(type);
+    usedTypes[getEnumSchemaName(type)] = type;
+    return result;
+
+  }
+
+  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::AbstractPolymorphicDispatcher*>(
+    type->polymorphicDispatcher
+  );
+
+  Type* interType = polymorphicDispatcher->getInterpretationType();
+  auto result = generateSchemaForType(interType, linkSchema, usedTypes);
+
+  result->enumValues = oatpp::List<oatpp::Any>::createShared();
+  auto interEnum = polymorphicDispatcher->getInterpretedEnum();
+  for(auto& v : interEnum) {
+    result->enumValues->push_back(v);
+  }
+
+  return result;
+
+}
+
+Schema::ObjectWrapper Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
+  Schema::ObjectWrapper result;
+
   auto classId = type->classId.id;
-  if(classId == oatpp::data::mapping::type::__class::String::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "string";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Int8::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_int8>::min();
-    result->maximum = std::numeric_limits<v_int8>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::UInt8::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_uint8>::min();
-    result->maximum = std::numeric_limits<v_uint8>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Int16::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_int16>::min();
-    result->maximum = std::numeric_limits<v_int16>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::UInt16::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_uint16>::min();
-    result->maximum = std::numeric_limits<v_uint16>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Int32::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_int32>::min();
-    result->maximum = std::numeric_limits<v_int32>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::UInt32::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->minimum = std::numeric_limits<v_uint32>::min();
-    result->maximum = std::numeric_limits<v_uint32>::max();
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Int64::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    result->format = "int64";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::UInt64::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "integer";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Float32::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "number";
-    result->format = "float";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Float64::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "number";
-    result->format = "double";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::Boolean::CLASS_ID.id){
-    auto result = Schema::createShared();
-    result->type = "boolean";
-    return result;
-  } else if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id){
-    return generateSchemaForTypeObject(type, linkSchema, usedTypes);
-  } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
-    return generateSchemaForTypeList(type, linkSchema, usedTypes);
-  } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id){
-    // TODO
+
+  if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id) {
+    result = generateSchemaForTypeObject(type, linkSchema, usedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id) {
+    result = generateSchemaForTypeList(type, linkSchema, usedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
+    result = Schema::createShared();
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id) {
+    result = generateSchemaForEnum(type, linkSchema, usedTypes, property);
   } else {
-    auto result = Schema::createShared();
-    result->type = type->classId.name;
-    if(type->nameQualifier) {
-      result->format = type->nameQualifier;
-    }
-    return result;
+    result = generateSchemaForSimpleType(type, property);
   }
-  
-  return Schema::createShared();
-  
+
+  return result;
+
 }
 
 void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
@@ -187,30 +226,30 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
     auto body = RequestBody::createShared();
     body->description = "request body";
     body->content = body->content.createShared();
-    
+
     auto it = endpointInfo.consumes.begin();
     while (it != endpointInfo.consumes.end()) {
-      
+
       auto mediaType = MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedTypes);
-      
+
       body->content[it->contentType] = mediaType;
-      
+
       it++;
     }
 
     return body;
 
   } else {
-  
+
     if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
 
       auto body = RequestBody::createShared();
       body->description = "request body";
-      
+
       auto mediaType = MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
-      
+
       body->content = oatpp::Fields<MediaTypeObject>({});
       if(endpointInfo.bodyContentType != nullptr) {
         body->content[endpointInfo.bodyContentType] = mediaType;
@@ -234,55 +273,55 @@ RequestBody::ObjectWrapper Generator::generateRequestBody(const Endpoint::Info& 
     }
 
   }
-  
+
   return nullptr;
 
 }
 
 Generator::Fields<OperationResponse> Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
-  
+
   auto responses = Fields<OperationResponse>::createShared();
-  
+
   if(endpointInfo.responses.size() > 0) {
-    
+
     auto it = endpointInfo.responses.begin();
     while (it != endpointInfo.responses.end()) {
-      
+
       auto mediaType = MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedTypes);
-      
+
       auto response = OperationResponse::createShared();
       response->description = it->second.description.get() == nullptr ? it->first.description : it->second.description;
       response->content = oatpp::Fields<MediaTypeObject>({});
       response->content[it->second.contentType] = mediaType;
       responses[oatpp::utils::conversion::int32ToStr(it->first.code)] = response;
-      
+
       it++;
     }
-    
+
   } else {
-  
+
     auto mediaType = MediaTypeObject::createShared();
     mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedTypes);
-  
+
     auto response = OperationResponse::createShared();
     response->description = "success";
     response->content = oatpp::Fields<MediaTypeObject>({});
     response->content["text/plain"] = mediaType;
     responses["200"] = response;
-  
+
   }
-  
+
   return responses;
-    
+
 }
-  
+
 void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
-  
+
   auto info = endpoint->info();
-  
+
   if(info) {
-    
+
     auto operation = PathItemOperation::createShared();
     operation->operationId = info->name;
     operation->summary = info->summary;
@@ -294,7 +333,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         operation->tags->push_back(tag);
       }
     }
-    
+
     if(oatpp::base::StrBuffer::equalsCI("get", info->method->c_str(), info->method->getSize())) {
       pathItem->operationGet = operation;
     } else if(oatpp::base::StrBuffer::equalsCI("put", info->method->c_str(), info->method->getSize())) {
@@ -312,7 +351,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     } else if(oatpp::base::StrBuffer::equalsCI("trace", info->method->c_str(), info->method->getSize())) {
       pathItem->operationTrace = operation;
     }
-    
+
     operation->responses = generateResponses(*info, true, usedTypes);
     operation->requestBody = generateRequestBody(*info, true, usedTypes);
 
@@ -373,15 +412,15 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     }
   }
 }
-  
+
 Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
-  
+
   auto result = Paths::createShared();
-  
+
   auto curr = endpoints->getFirstNode();
   while (curr != nullptr) {
     auto endpoint = curr->getData();
-    
+
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
       if(path->getSize() == 0) {
@@ -398,15 +437,15 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
     }
-    
+
     curr = curr->getNext();
   }
-  
+
   return result;
-  
+
 }
-  
-void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+
+void Generator::decomposeObject(const Type* type, UsedTypes& decomposedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeObject()]: Error. Type should not be null.");
 
@@ -414,31 +453,35 @@ void Generator::decomposeObject(const oatpp::data::mapping::type::Type* type, Us
   if(schemaIt != decomposedTypes.end()) {
     return;
   }
-  
+
   decomposedTypes[type->nameQualifier] = type;
-  
+
   auto properties = type->propertiesGetter();
-  if(properties->getList().size() == 0) {
-    type->creator(); // init type by creating first instance of that type
-  }
-  
-  auto it = properties->getList().begin();
-  while (it != properties->getList().end()) {
-    auto p = *it ++;
+
+  for(auto* p : properties->getList()) {
     decomposeType(p->type, decomposedTypes);
   }
+
 }
 
-void Generator::decomposeList(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+void Generator::decomposeList(const Type* type, UsedTypes& decomposedTypes) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeList()]: Error. Type should not be null.");
   decomposeType(*type->params.begin(), decomposedTypes);
 }
 
-void Generator::decomposeMap(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+void Generator::decomposeMap(const Type* type, UsedTypes& decomposedTypes) {
   // TODO
 }
-  
-void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, UsedTypes& decomposedTypes) {
+
+void Generator::decomposeEnum(const Type* type, UsedTypes& decomposedTypes) {
+  auto schemaIt = decomposedTypes.find(getEnumSchemaName(type));
+  if(schemaIt != decomposedTypes.end()) {
+    return;
+  }
+  decomposedTypes[getEnumSchemaName(type)] = type;
+}
+
+void Generator::decomposeType(const Type* type, UsedTypes& decomposedTypes) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeType()]: Error. Type should not be null.");
   auto classId = type->classId.id;
   if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id){
@@ -447,6 +490,8 @@ void Generator::decomposeType(const oatpp::data::mapping::type::Type* type, Used
     decomposeList(type, decomposedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id){
     decomposeMap(type, decomposedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id){
+    decomposeEnum(type, decomposedTypes);
   }
 }
   
