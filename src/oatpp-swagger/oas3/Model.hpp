@@ -291,6 +291,11 @@ class Schema : public oatpp::Object {
   DTO_FIELD(String, format);
 
   /**
+   * Description of the field.
+   */
+  DTO_FIELD(String, description);
+
+  /**
    * Minimum value.
    */
   DTO_FIELD(Int64, minimum);
@@ -309,6 +314,11 @@ class Schema : public oatpp::Object {
    * Items.
    */
   DTO_FIELD(Schema, items);
+
+  /**
+   * Enum of possible values.
+   */
+  DTO_FIELD(List<Any>, enumValues, "enum");
 
   /**
    * Ref.
