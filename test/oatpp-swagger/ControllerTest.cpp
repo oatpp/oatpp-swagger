@@ -91,7 +91,7 @@ void ControllerTest::onRun() {
     oatpp::parser::Caret caret(responseText);
     caret.findChar('{');
 
-    auto document = objectMapper->readFromCaret<oatpp::swagger::oas3::Document>(caret);
+    auto document = objectMapper->readFromCaret<oatpp::Object<oatpp::swagger::oas3::Document>>(caret);
 
     if (caret.hasError()) {
       OATPP_LOGD(TAG, "error='%s', pos=%d", caret.getErrorMessage(), caret.getPosition());

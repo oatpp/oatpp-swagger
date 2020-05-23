@@ -51,11 +51,11 @@ namespace oatpp { namespace swagger {
  */
 class Controller : public oatpp::web::server::api::ApiController {
 private:
-  oas3::Document::ObjectWrapper m_document;
+  oatpp::Object<oas3::Document> m_document;
   std::shared_ptr<oatpp::swagger::Resources> m_resources;
 public:
   Controller(const std::shared_ptr<ObjectMapper>& objectMapper,
-             const oas3::Document::ObjectWrapper& document,
+             const oatpp::Object<oas3::Document>& document,
              const std::shared_ptr<oatpp::swagger::Resources>& resources)
     : oatpp::web::server::api::ApiController(objectMapper)
     , m_document(document)

@@ -15,9 +15,9 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
-class HelloDto : public oatpp::Object {
+class HelloDto : public oatpp::DTO {
 
-  DTO_INIT(HelloDto, Object)
+  DTO_INIT(HelloDto, DTO)
 
   DTO_FIELD(String, userAgent, "user-agent");
   DTO_FIELD(String, message);
@@ -25,9 +25,9 @@ class HelloDto : public oatpp::Object {
 
 };
 
-class MessageDto : public oatpp::Object {
+class MessageDto : public oatpp::DTO {
 
-  DTO_INIT(MessageDto, Object)
+  DTO_INIT(MessageDto, DTO)
 
   DTO_FIELD(String, message);
 
@@ -62,7 +62,7 @@ public:
    */
   ENDPOINT_INFO(Root) {
     info->summary = "Example 'Root' endpoint. Without any params";
-    info->addResponse<HelloDto>(Status::CODE_200, "application/json");
+    info->addResponse<Object<HelloDto>>(Status::CODE_200, "application/json");
   }
   ENDPOINT_ASYNC("GET", "/", Root) {
 
@@ -114,18 +114,18 @@ public:
    */
   ENDPOINT_INFO(EchoDtoBody) {
     info->summary = "Echo endpoint. Echo body content Serialized/Deserialized as DTO";
-    info->addConsumes<MessageDto>("application/json");
-    info->addResponse<MessageDto>(Status::CODE_200, "application/json");
+    info->addConsumes<Object<MessageDto>>("application/json");
+    info->addResponse<Object<MessageDto>>(Status::CODE_200, "application/json");
   }
   ENDPOINT_ASYNC("POST", "/body/dto", EchoDtoBody) {
 
   ENDPOINT_ASYNC_INIT(EchoDtoBody)
 
     Action act() override {
-      return request->readBodyToDtoAsync<MessageDto>(controller->getDefaultObjectMapper()).callbackTo(&EchoDtoBody::returnResponse);
+      return request->readBodyToDtoAsync<oatpp::Object<MessageDto>>(controller->getDefaultObjectMapper()).callbackTo(&EchoDtoBody::returnResponse);
     }
 
-    Action returnResponse(const MessageDto::ObjectWrapper& body){
+    Action returnResponse(const oatpp::Object<MessageDto>& body){
       return _return(controller->createDtoResponse(Status::CODE_200, body));
     }
 

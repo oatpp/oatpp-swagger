@@ -25,9 +25,9 @@ ENUM(HelloEnum, v_int16,
      VALUE(V5, 50, "value-5", "description-5")
 )
 
-class UserDto : public oatpp::Object {
+class UserDto : public oatpp::DTO {
 
-  DTO_INIT(UserDto, Object)
+  DTO_INIT(UserDto, DTO)
 
   DTO_FIELD(Int32, id);
   DTO_FIELD(String, firstName, "first-name");
@@ -89,7 +89,7 @@ public:
 
   ENDPOINT_INFO(root) {
     info->summary = "Index.html page";
-    info->addResponse<UserDto>(Status::CODE_200, "text/html");
+    info->addResponse<Object<UserDto>>(Status::CODE_200, "text/html");
   }
   ENDPOINT("GET", "/", root) {
     const char* html =
@@ -109,24 +109,24 @@ public:
 
   ENDPOINT_INFO(createUser) {
     info->summary = "Create new User";
-    info->addConsumes<UserDto>("application/json");
-    info->addResponse<UserDto>(Status::CODE_200, "application/json");
+    info->addConsumes<Object<UserDto>>("application/json");
+    info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json");
   }
   ENDPOINT("POST", "demo/api/users", createUser,
-           BODY_DTO(UserDto, userDto)) {
+           BODY_DTO(Object<UserDto>, userDto)) {
     return createDtoResponse(Status::CODE_200, UserDto::createShared());
   }
 
 
   ENDPOINT_INFO(putUser) {
     info->summary = "Update User by userId";
-    info->addConsumes<UserDto>("application/json");
-    info->addResponse<UserDto>(Status::CODE_200, "application/json");
+    info->addConsumes<Object<UserDto>>("application/json");
+    info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json");
     info->addResponse<String>(Status::CODE_404, "text/plain");
   }
   ENDPOINT("PUT", "demo/api/users/{userId}", putUser,
            PATH(Int32, userId),
-           BODY_DTO(UserDto, userDto)) {
+           BODY_DTO(Object<UserDto>, userDto)) {
     userDto->id = userId;
     return createDtoResponse(Status::CODE_200, UserDto::createShared());
   }
@@ -134,7 +134,7 @@ public:
 
   ENDPOINT_INFO(getUserById) {
     info->summary = "Get one User by userId";
-    info->addResponse<UserDto>(Status::CODE_200, "application/json", "User found for id");
+    info->addResponse<Object<UserDto>>(Status::CODE_200, "application/json", "User found for id");
     info->addResponse<String>(Status::CODE_404, "text/plain", "User not found");
     info->pathParams.add("someId", String::Class::getType()).description = "Some ID:)";
     info->pathParams["userId"].description = "User Id";
@@ -147,10 +147,10 @@ public:
 
   ENDPOINT_INFO(getUsers) {
     info->summary = "get all stored users";
-    info->addResponse<List<UserDto>>(Status::CODE_200, "application/json");
+    info->addResponse<List<Object<UserDto>>>(Status::CODE_200, "application/json");
   }
   ENDPOINT("GET", "demo/api/users", getUsers) {
-    return createDtoResponse(Status::CODE_200, List<UserDto>::createShared());
+    return createDtoResponse(Status::CODE_200, List<Object<UserDto>>::createShared());
   }
 
 

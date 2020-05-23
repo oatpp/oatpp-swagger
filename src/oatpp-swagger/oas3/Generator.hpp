@@ -52,12 +52,9 @@ public:
    */
   typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
 
-  typedef oatpp::List<PathItemParameter> PathItemParameters;
+  typedef oatpp::List<Object<PathItemParameter>> PathItemParameters;
   
-  template <class Value>
-  using Fields = oatpp::Fields<Value>;
-  
-  typedef Fields<PathItem> Paths;
+  typedef Fields<Object<PathItem>> Paths;
   
   typedef std::unordered_map<oatpp::String, const Type*> UsedTypes;
 
@@ -72,22 +69,22 @@ private:
 
   static oatpp::String getEnumSchemaName(const Type* type);
 
-  static Schema::ObjectWrapper generateSchemaForSimpleType(const Type* type, Type::Property* property = nullptr);
-  static Schema::ObjectWrapper generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes);
-  static Schema::ObjectWrapper generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes);
-  static Schema::ObjectWrapper generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
-  static Schema::ObjectWrapper generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
+  static oatpp::Object<Schema> generateSchemaForSimpleType(const Type* type, Type::Property* property = nullptr);
+  static oatpp::Object<Schema> generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static oatpp::Object<Schema> generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static oatpp::Object<Schema> generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
+  static oatpp::Object<Schema> generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
 
-  static RequestBody::ObjectWrapper generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static Fields<OperationResponse> generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const PathItem::ObjectWrapper& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+  static oatpp::Object<RequestBody> generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static Fields<Object<OperationResponse>> generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
+  static void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
   
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
   static Paths generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
 
-  static SecurityScheme::ObjectWrapper generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
+  static oatpp::Object<SecurityScheme> generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
   static void decomposeObject(const Type* type, UsedTypes& decomposedTypes);
   static void decomposeList(const Type* type, UsedTypes& decomposedTypes);
@@ -96,9 +93,9 @@ private:
   static void decomposeType(const Type* type, UsedTypes& decomposedTypes);
   static UsedTypes decomposeTypes(UsedTypes& usedTypes);
   
-  static Components::ObjectWrapper generateComponents(const UsedTypes &decomposedTypes,
-                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
-                                                      UsedSecuritySchemes &usedSecuritySchemes);
+  static oatpp::Object<Components> generateComponents(const UsedTypes &decomposedTypes,
+                                                                    const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
+                                                                    UsedSecuritySchemes &usedSecuritySchemes);
 
 public:
 
@@ -108,7 +105,7 @@ public:
    * @param endpoints &l:Generator::Endpoints;.
    * @return - &id:oatpp::swagger::oas3::Document;.
    */
-  static Document::ObjectWrapper generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
+  static oatpp::Object<Document> generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
 
 };
   
