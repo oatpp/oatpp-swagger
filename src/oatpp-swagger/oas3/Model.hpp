@@ -316,6 +316,12 @@ class Schema : public oatpp::DTO {
   DTO_FIELD(Object<Schema>, items);
 
   /**
+   * Items should be unique.
+   * @return
+   */
+  DTO_FIELD(Boolean, uniqueItems);
+
+  /**
    * Enum of possible values.
    */
   DTO_FIELD(List<Any>, enumValues, "enum");

@@ -70,7 +70,7 @@ private:
   static oatpp::String getEnumSchemaName(const Type* type);
 
   static oatpp::Object<Schema> generateSchemaForSimpleType(const Type* type, Type::Property* property = nullptr);
-  static oatpp::Object<Schema> generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes);
+  static oatpp::Object<Schema> generateSchemaForCollection_1D(const Type* type, bool linkSchema, UsedTypes& usedTypes, bool uniqueItems);
   static oatpp::Object<Schema> generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes);
   static oatpp::Object<Schema> generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
   static oatpp::Object<Schema> generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
@@ -87,7 +87,7 @@ private:
   static oatpp::Object<SecurityScheme> generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
   static void decomposeObject(const Type* type, UsedTypes& decomposedTypes);
-  static void decomposeList(const Type* type, UsedTypes& decomposedTypes);
+  static void decomposeCollection_1D(const Type* type, UsedTypes& decomposedTypes);
   static void decomposeMap(const Type* type, UsedTypes& decomposedTypes);
   static void decomposeEnum(const Type* type, UsedTypes& decomposedTypes);
   static void decomposeType(const Type* type, UsedTypes& decomposedTypes);

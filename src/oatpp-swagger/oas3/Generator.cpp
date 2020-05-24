@@ -135,13 +135,14 @@ oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, b
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForTypeList(const Type* type, bool linkSchema, UsedTypes& usedTypes) {
-
-  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeList()]: Error. Type should not be null.");
-
+oatpp::Object<Schema> Generator::generateSchemaForCollection_1D(const Type* type, bool linkSchema, UsedTypes& usedTypes, bool uniqueItems) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForCollection_1D()]: Error. Type should not be null.");
   auto result = Schema::createShared();
   result->type = "array";
   result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedTypes);
+  if(uniqueItems) {
+    result->uniqueItems = true;
+  }
   return result;
 }
 
@@ -184,8 +185,12 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
 
   if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id) {
     result = generateSchemaForTypeObject(type, linkSchema, usedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractVector::CLASS_ID.id) {
+    result = generateSchemaForCollection_1D(type, linkSchema, usedTypes, false);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id) {
-    result = generateSchemaForTypeList(type, linkSchema, usedTypes);
+    result = generateSchemaForCollection_1D(type, linkSchema, usedTypes, false);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID.id) {
+    result = generateSchemaForCollection_1D(type, linkSchema, usedTypes, true);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
     result = Schema::createShared();
   } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id) {
@@ -464,8 +469,8 @@ void Generator::decomposeObject(const Type* type, UsedTypes& decomposedTypes) {
 
 }
 
-void Generator::decomposeList(const Type* type, UsedTypes& decomposedTypes) {
-  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeList()]: Error. Type should not be null.");
+void Generator::decomposeCollection_1D(const Type* type, UsedTypes& decomposedTypes) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::Collection_1D()]: Error. Type should not be null.");
   decomposeType(*type->params.begin(), decomposedTypes);
 }
 
@@ -486,8 +491,12 @@ void Generator::decomposeType(const Type* type, UsedTypes& decomposedTypes) {
   auto classId = type->classId.id;
   if(classId == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id){
     decomposeObject(type, decomposedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractVector::CLASS_ID.id){
+    decomposeCollection_1D(type, decomposedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id){
-    decomposeList(type, decomposedTypes);
+    decomposeCollection_1D(type, decomposedTypes);
+  } else if(classId == oatpp::data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID.id){
+    decomposeCollection_1D(type, decomposedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id){
     decomposeMap(type, decomposedTypes);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id){
