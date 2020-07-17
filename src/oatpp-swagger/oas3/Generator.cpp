@@ -102,8 +102,8 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
     if(!property->info.description.empty()) {
       result->description = property->info.description.c_str();
     }
-    if(!property->info.default_value.empty()) {
-      result->default_value = property->info.default_value.c_str();
+    if(!property->info.defaultValue.empty()) {
+      result->defaultValue = property->info.defaultValue.c_str();
     }
   }
 

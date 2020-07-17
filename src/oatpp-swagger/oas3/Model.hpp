@@ -298,7 +298,7 @@ class Schema : public oatpp::DTO {
   /**
    * Default value for the field.
    */
-  DTO_FIELD(String, default_value);
+  DTO_FIELD(String, defaultValue);
 
   /**
    * Minimum value.
