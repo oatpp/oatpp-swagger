@@ -45,7 +45,7 @@ oatpp::String Generator::getEnumSchemaName(const Type* type) {
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property) {
+oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForSimpleType()]: Error. Type should not be null.");
 
@@ -102,9 +102,10 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
     if(!property->info.description.empty()) {
       result->description = property->info.description.c_str();
     }
-    if(!property->info.defaultValue.empty()) {
-      result->defaultValue = property->info.defaultValue.c_str();
-    }
+    // if(!property->info.defaultValue.empty()) {
+    //   result->defaultValue = property->info.defaultValue.c_str();
+    // }
+    // Should use defaultValue but don't know how
   }
 
   return result;
@@ -127,10 +128,11 @@ oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, b
     result->type = "object";
     result->properties = {};
 
+    auto instance = type->creator();
     auto properties = type->propertiesGetter();
 
     for(auto* p : properties->getList()) {
-      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p);
+      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, p->get(instance));
     }
 
     return result;
@@ -178,7 +180,7 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property) {
+oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
@@ -199,7 +201,7 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
   } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id) {
     result = generateSchemaForEnum(type, linkSchema, usedTypes, property);
   } else {
-    result = generateSchemaForSimpleType(type, property);
+    result = generateSchemaForSimpleType(type, property, defaultValue);
   }
 
   return result;
