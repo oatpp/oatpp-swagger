@@ -45,7 +45,7 @@ oatpp::String Generator::getEnumSchemaName(const Type* type) {
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const Void& defaultValue) {
+oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const oatpp::data::mapping::type::Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForSimpleType()]: Error. Type should not be null.");
 
@@ -180,7 +180,7 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const Void& defaultValue) {
+oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const oatpp::data::mapping::type::Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
