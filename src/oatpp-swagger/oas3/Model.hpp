@@ -202,7 +202,7 @@ class ServerVariable : public oatpp::DTO {
       
       auto result = createShared();
       result->description = model->description;
-      result->defaultValue = model->defaultValue;
+      // result->defaultValue = model->defaultValue;
       
       if(model->enumValues) {
         
