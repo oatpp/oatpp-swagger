@@ -311,6 +311,11 @@ class Schema : public oatpp::DTO {
   DTO_FIELD(Fields<Object<Schema>>, properties);
 
   /**
+   * Additional properties.
+   */
+  DTO_FIELD(Object<Schema>, additionalProperties);
+
+  /**
    * Items.
    */
   DTO_FIELD(Object<Schema>, items);
