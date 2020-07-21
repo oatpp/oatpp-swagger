@@ -193,6 +193,11 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
     result = generateSchemaForCollection_1D(type, linkSchema, usedTypes, true);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
     result = Schema::createShared();
+    // A PairList<String, T> is a Field<T> and a Field<T> is a simple JSON object
+    if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
+      result->type = "object";
+      result->additionalProperties = generateSchemaForType(type->params.back(), linkSchema, usedTypes, property);
+    }
   } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id) {
     result = generateSchemaForEnum(type, linkSchema, usedTypes, property);
   } else {

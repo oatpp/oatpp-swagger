@@ -33,6 +33,11 @@ class UserDto : public oatpp::DTO {
   DTO_FIELD(String, firstName, "first-name");
   DTO_FIELD(String, lastName, "last-name");
   DTO_FIELD(List<String>, friends) = List<String>::createShared();
+  DTO_FIELD(Fields<String>, todoList);
+  DTO_FIELD(Fields<Fields<String>>, todoTree);
+  DTO_FIELD(Fields<Int64>, numberList);
+  DTO_FIELD(Fields<Object<UserDto>>, friendsByNickname);
+  DTO_FIELD(Fields<List<String>>, taskForFriends);
 
   DTO_FIELD(Enum<HelloEnum>, helloEnum);
 
