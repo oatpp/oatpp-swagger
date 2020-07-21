@@ -32,6 +32,8 @@ class UserDto : public oatpp::DTO {
   DTO_FIELD(Int32, id);
   DTO_FIELD(String, firstName, "first-name");
   DTO_FIELD(String, lastName, "last-name");
+  DTO_FIELD(String, referral, "referral") = "direct";
+  DTO_FIELD(Int32, intVal) = 32;
   DTO_FIELD(List<String>, friends) = List<String>::createShared();
   DTO_FIELD(Fields<String>, todoList);
   DTO_FIELD(Fields<Fields<String>>, todoTree);
@@ -39,7 +41,7 @@ class UserDto : public oatpp::DTO {
   DTO_FIELD(Fields<Object<UserDto>>, friendsByNickname);
   DTO_FIELD(Fields<List<String>>, taskForFriends);
 
-  DTO_FIELD(Enum<HelloEnum>, helloEnum);
+  DTO_FIELD(Enum<HelloEnum>, helloEnum) = HelloEnum::V1;
 
 };
 
