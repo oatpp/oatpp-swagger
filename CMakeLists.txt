@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
+include_directories(/home/ws1/oatpp)
+
 ###################################################################################################
 ## These variables are passed to oatpp-module-install.cmake script
 ## use these variables to configure module installation
@@ -21,7 +23,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(OATPP_DIR_SRC "Path to oatpp module directory (sources)")
 option(OATPP_DIR_LIB "Path to directory with liboatpp (directory containing ex: liboatpp.so or liboatpp.dynlib)")
 option(OATPP_BUILD_TESTS "Build tests for this module" ON)
-option(OATPP_INSTALL "Install module binaries" ON)
+option(OATPP_INSTALL "Install module binaries" OFF)
 
 set(OATPP_MODULES_LOCATION "INSTALLED" CACHE STRING "Location where to find oatpp modules. can be [INSTALLED|EXTERNAL|CUSTOM]")
 

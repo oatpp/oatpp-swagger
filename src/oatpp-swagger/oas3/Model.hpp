@@ -202,7 +202,6 @@ class ServerVariable : public oatpp::DTO {
       
       auto result = createShared();
       result->description = model->description;
-      // result->defaultValue = model->defaultValue;
       
       if(model->enumValues) {
         
@@ -298,7 +297,7 @@ class Schema : public oatpp::DTO {
   /**
    * Default value for the field.
    */
-  DTO_FIELD(String, defaultValue);
+  DTO_FIELD(Any, defaultValue, "default");
 
   /**
    * Minimum value.

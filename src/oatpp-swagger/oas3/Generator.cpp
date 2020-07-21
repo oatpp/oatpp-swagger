@@ -45,7 +45,7 @@ oatpp::String Generator::getEnumSchemaName(const Type* type) {
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const oatpp::Void& defaultValue) {
+oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const oatpp::Any* defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForSimpleType()]: Error. Type should not be null.");
 
@@ -102,10 +102,9 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
     if(!property->info.description.empty()) {
       result->description = property->info.description.c_str();
     }
-    // if(!property->info.defaultValue.empty()) {
-    //   result->defaultValue = property->info.defaultValue.c_str();
-    // }
-    // Should use defaultValue but don't know how
+    if (defaultValue != nullptr) {
+      result->defaultValue = *defaultValue;
+    }
   }
 
   return result;
@@ -128,11 +127,12 @@ oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, b
     result->type = "object";
     result->properties = {};
 
-    auto instance = type->creator();
+    auto instance = type->creator().get();
     auto properties = type->propertiesGetter();
 
     for(auto* p : properties->getList()) {
-      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, p->get(instance));
+      auto defaultValue = oatpp::Any(p->get(instance));
+      result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, &defaultValue);
     }
 
     return result;
@@ -180,7 +180,7 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const oatpp::Void& defaultValue) {
+oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const oatpp::Any* defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
