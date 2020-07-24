@@ -73,6 +73,7 @@ private:
   static oatpp::Object<Schema> generateSchemaForCollection_1D(const Type* type, bool linkSchema, UsedTypes& usedTypes, bool uniqueItems);
   static oatpp::Object<Schema> generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes);
   static oatpp::Object<Schema> generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
+  static oatpp::Object<Schema> generateSchemaForAbstractPairList(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr);
   static oatpp::Object<Schema> generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property = nullptr, const oatpp::Void& defaultValue = nullptr);
 
   static oatpp::Object<RequestBody> generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
