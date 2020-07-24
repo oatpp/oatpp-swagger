@@ -180,6 +180,24 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 
 }
 
+oatpp::Object<Schema> Generator::generateSchemaForAbstractPairList(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property ) {
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
+
+  auto result = Schema::createShared();
+
+  if (property != nullptr && !property->info.description.empty()) {
+    result->description = property->info.description.c_str();
+  }
+
+  // A PairList<String, T> is a Field<T> and a Field<T> is a simple JSON object
+  if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
+    result->type = "object";
+    result->additionalProperties = generateSchemaForType(type->params.back(), linkSchema, usedTypes);
+  }
+
+  return result;
+}
+
 oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const oatpp::Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
@@ -197,12 +215,7 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
   } else if(classId == oatpp::data::mapping::type::__class::AbstractUnorderedSet::CLASS_ID.id) {
     result = generateSchemaForCollection_1D(type, linkSchema, usedTypes, true);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
-    result = Schema::createShared();
-    // A PairList<String, T> is a Field<T> and a Field<T> is a simple JSON object
-    if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
-      result->type = "object";
-      result->additionalProperties = generateSchemaForType(type->params.back(), linkSchema, usedTypes, property);
-    }
+    result = generateSchemaForAbstractPairList(type, linkSchema, usedTypes, property);
   } else if(classId == oatpp::data::mapping::type::__class::AbstractEnum::CLASS_ID.id) {
     result = generateSchemaForEnum(type, linkSchema, usedTypes, property);
   } else {
