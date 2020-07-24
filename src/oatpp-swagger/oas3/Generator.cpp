@@ -181,7 +181,7 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 }
 
 oatpp::Object<Schema> Generator::generateSchemaForAbstractPairList(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property ) {
-  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForAbstractPairList()]: Error. Type should not be null.");
 
   auto result = Schema::createShared();
 
