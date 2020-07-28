@@ -54,6 +54,9 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
   auto classId = type->classId.id;
   if(classId == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
     result->type = "string";
+    if(property != nullptr && !property->info.pattern.empty()) {
+      result->pattern = property->info.pattern.c_str();
+    }
   } else if(classId == oatpp::data::mapping::type::__class::Int8::CLASS_ID.id) {
     result->type = "integer";
     result->minimum = std::numeric_limits<v_int8>::min();
@@ -95,15 +98,6 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
     result->type = type->classId.name;
     if(type->nameQualifier) {
       result->format = type->nameQualifier;
-    }
-  }
-
-  if(property != nullptr) {
-    if(!property->info.description.empty()) {
-      result->description = property->info.description.c_str();
-    }
-    if (defaultValue) {
-      result->defaultValue = defaultValue;
     }
   }
 
@@ -185,11 +179,7 @@ oatpp::Object<Schema> Generator::generateSchemaForAbstractPairList(const Type* t
 
   auto result = Schema::createShared();
 
-  if (property != nullptr && !property->info.description.empty()) {
-    result->description = property->info.description.c_str();
-  }
-
-  // A PairList<String, T> is a Field<T> and a Field<T> is a simple JSON object
+  // A PairList<String, T> is a Fields<T> and a Fields<T> is a simple JSON object
   if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
     result->type = "object";
     result->additionalProperties = generateSchemaForType(type->params.back(), linkSchema, usedTypes);
@@ -222,8 +212,16 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
     result = generateSchemaForSimpleType(type, property, defaultValue);
   }
 
-  return result;
+  if(property != nullptr) {
+    if(!property->info.description.empty()) {
+      result->description = property->info.description.c_str();
+    }
+    if (defaultValue) {
+      result->defaultValue = defaultValue;
+    }
+  }
 
+  return result;
 }
 
 void Generator::addParamsToParametersList(const PathItemParameters& paramsList,

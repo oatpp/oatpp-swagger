@@ -32,9 +32,16 @@ class UserDto : public oatpp::DTO {
   DTO_FIELD(Int32, id);
   DTO_FIELD(String, firstName, "first-name");
   DTO_FIELD(String, lastName, "last-name");
+  DTO_FIELD_INFO(referral) {
+    info->pattern = "^[^\\s]+$";
+  };
   DTO_FIELD(String, referral, "referral") = "direct";
   DTO_FIELD(Int32, intVal) = 32;
-  DTO_FIELD(List<String>, friends) = List<String>::createShared();
+  DTO_FIELD(List<String>, friends) = [](){
+    auto defaultFriends = List<String>::createShared();
+    defaultFriends->push_back(String("me")); // :)
+    return defaultFriends;
+  }();
   DTO_FIELD_INFO(todoList) {
     info->description = "Task title -> task description";
   };

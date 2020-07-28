@@ -298,6 +298,11 @@ class Schema : public oatpp::DTO {
    * Default value for the field.
    */
   DTO_FIELD(Any, defaultValue, "default");
+  
+  /**
+   * Pattern value for the field.
+   */
+  DTO_FIELD(String, pattern, "pattern");
 
   /**
    * Minimum value.
