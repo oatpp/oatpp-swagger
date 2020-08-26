@@ -496,7 +496,14 @@ void Generator::decomposeCollection_1D(const Type* type, UsedTypes& decomposedTy
 }
 
 void Generator::decomposeMap(const Type* type, UsedTypes& decomposedTypes) {
-  // TODO
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeMap()]: Error. Type should not be null.");
+
+  // The only possible JSON representation of a PairList<A, B> is A being a String, even if an numeric one
+  if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
+    decomposeType(type->params.back(), decomposedTypes);
+  }
+
+  // TODO - more advanced cases with complex key types
 }
 
 void Generator::decomposeEnum(const Type* type, UsedTypes& decomposedTypes) {

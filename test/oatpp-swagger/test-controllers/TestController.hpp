@@ -25,6 +25,13 @@ ENUM(HelloEnum, v_int16,
      VALUE(V5, 50, "value-5", "description-5")
 )
 
+class TaskDto : public oatpp::DTO {
+  DTO_INIT(TaskDto, DTO)
+
+  DTO_FIELD(String, description);
+  DTO_FIELD(Boolean, done);
+};
+
 class UserDto : public oatpp::DTO {
 
   DTO_INIT(UserDto, DTO)
@@ -44,6 +51,7 @@ class UserDto : public oatpp::DTO {
   DTO_FIELD(Fields<String>, todoList);
   DTO_FIELD(Fields<Fields<String>>, todoTree);
   DTO_FIELD(Fields<Int64>, numberList);
+  DTO_FIELD(Fields<Object<TaskDto>>, tasksByTitle);
   DTO_FIELD(Fields<Object<UserDto>>, friendsByNickname);
   DTO_FIELD(Fields<List<String>>, taskForFriends);
 
