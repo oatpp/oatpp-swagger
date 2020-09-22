@@ -53,6 +53,12 @@ namespace {
       return oatpp::swagger::Resources::streamResources(OATPP_SWAGGER_RES_PATH);
     }());
 
+    OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::Generator::Config>, generatorConfig)([] {
+      auto config = std::make_shared<oatpp::swagger::Generator::Config>();
+      config->enableInterpretations = {"test"};
+      return config;
+    }());
+
   };
 
 }
@@ -112,8 +118,6 @@ void ControllerTest::onRun() {
     OATPP_LOGD(TAG, responseText->c_str());
 
   }
-
-
 
   // TODO test generated document here
   OATPP_LOGV(TAG, "TODO implement test");

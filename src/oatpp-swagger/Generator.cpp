@@ -29,11 +29,11 @@
 
 #include <limits>
 
-namespace oatpp { namespace swagger { namespace oas3 {
+namespace oatpp { namespace swagger {
 
 oatpp::String Generator::getEnumSchemaName(const Type* type) {
 
-  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::AbstractPolymorphicDispatcher*>(
+  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::PolymorphicDispatcher*>(
     type->polymorphicDispatcher
   );
 
@@ -45,11 +45,11 @@ oatpp::String Generator::getEnumSchemaName(const Type* type) {
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, Type::Property* property, const oatpp::Void& defaultValue) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForSimpleType(const Type* type, oatpp::BaseObject::Property* property, const oatpp::Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForSimpleType()]: Error. Type should not be null.");
 
-  auto result = Schema::createShared();
+  auto result = oas3::Schema::createShared();
 
   auto classId = type->classId.id;
   if(classId == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
@@ -95,21 +95,18 @@ oatpp::Object<Schema> Generator::generateSchemaForSimpleType(const Type* type, T
   } else if(classId == oatpp::data::mapping::type::__class::Boolean::CLASS_ID.id) {
     result->type = "boolean";
   } else {
-    result->type = type->classId.name;
-    if(type->nameQualifier) {
-      result->format = type->nameQualifier;
-    }
+    return nullptr; // Unknown simple type;
   }
 
   return result;
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForTypeObject(const Type* type, bool linkSchema, UsedTypes& usedTypes) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
 
-  auto result = Schema::createShared();
+  auto result = oas3::Schema::createShared();
   if(linkSchema) {
 
     result->ref = oatpp::String("#/components/schemas/") + type->nameQualifier;
@@ -121,11 +118,14 @@ oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, b
     result->type = "object";
     result->properties = {};
 
-    auto instance = type->creator();
-    auto properties = type->propertiesGetter();
+    auto polymorphicDispatcher = static_cast<const oatpp::data::mapping::type::__class::AbstractObject::PolymorphicDispatcher*>(
+      type->polymorphicDispatcher
+    );
+    auto instance = polymorphicDispatcher->createObject();
+    auto properties = polymorphicDispatcher->getProperties();
 
     for(auto* p : properties->getList()) {
-      const auto& defaultValue = p->get(instance.get());
+      const auto& defaultValue = p->get(static_cast<oatpp::BaseObject*>(instance.get()));
       result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, defaultValue);
     }
 
@@ -134,9 +134,9 @@ oatpp::Object<Schema> Generator::generateSchemaForTypeObject(const Type* type, b
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForCollection_1D(const Type* type, bool linkSchema, UsedTypes& usedTypes, bool uniqueItems) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForCollection_1D(const Type* type, bool linkSchema, UsedTypes& usedTypes, bool uniqueItems) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForCollection_1D()]: Error. Type should not be null.");
-  auto result = Schema::createShared();
+  auto result = oas3::Schema::createShared();
   result->type = "array";
   result->items = generateSchemaForType(*type->params.begin(), linkSchema, usedTypes);
   if(uniqueItems) {
@@ -145,19 +145,19 @@ oatpp::Object<Schema> Generator::generateSchemaForCollection_1D(const Type* type
   return result;
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, oatpp::BaseObject::Property* property) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
 
   if(linkSchema) {
 
-    auto result = Schema::createShared();
+    auto result = oas3::Schema::createShared();
     result->ref = oatpp::String("#/components/schemas/") + getEnumSchemaName(type);
     usedTypes[getEnumSchemaName(type)] = type;
     return result;
 
   }
 
-  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::AbstractPolymorphicDispatcher*>(
+  auto polymorphicDispatcher = static_cast<const data::mapping::type::__class::AbstractEnum::PolymorphicDispatcher*>(
     type->polymorphicDispatcher
   );
 
@@ -174,13 +174,13 @@ oatpp::Object<Schema> Generator::generateSchemaForEnum(const Type* type, bool li
 
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForAbstractPairList(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property ) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForAbstractPairList(const Type* type, bool linkSchema, UsedTypes& usedTypes, oatpp::BaseObject::Property* property ) {
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForAbstractPairList()]: Error. Type should not be null.");
 
-  auto result = Schema::createShared();
+  auto result = oas3::Schema::createShared();
 
   // A PairList<String, T> is a Fields<T> and a Fields<T> is a simple JSON object
-  if (type->params.front()->classId.id == oatpp::data::mapping::type::__class::String::CLASS_ID.id) {
+  if (type->params.front()->classId.id == oatpp::String::Class::CLASS_ID.id) {
     result->type = "object";
     result->additionalProperties = generateSchemaForType(type->params.back(), linkSchema, usedTypes);
   }
@@ -188,11 +188,11 @@ oatpp::Object<Schema> Generator::generateSchemaForAbstractPairList(const Type* t
   return result;
 }
 
-oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, Type::Property* property, const oatpp::Void& defaultValue) {
+oatpp::Object<oas3::Schema> Generator::generateSchemaForType(const Type* type, bool linkSchema, UsedTypes& usedTypes, oatpp::BaseObject::Property* property, const oatpp::Void& defaultValue) {
 
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForType()]: Error. Type should not be null.");
 
-  oatpp::Object<Schema> result;
+  oatpp::Object<oas3::Schema> result;
 
   auto classId = type->classId.id;
 
@@ -210,6 +210,21 @@ oatpp::Object<Schema> Generator::generateSchemaForType(const Type* type, bool li
     result = generateSchemaForEnum(type, linkSchema, usedTypes, property);
   } else {
     result = generateSchemaForSimpleType(type, property, defaultValue);
+  }
+
+  if(!result) {
+    auto interpretation = type->findInterpretation(m_config->enableInterpretations);
+    if(interpretation) {
+      result = generateSchemaForType(interpretation->getInterpretationType(), linkSchema, usedTypes);
+    }
+  }
+
+  if(!result) {
+    result = oas3::Schema::createShared();
+    result->type = type->classId.name;
+    if(type->nameQualifier) {
+      result->format = type->nameQualifier;
+    }
   }
 
   if(property != nullptr) {
@@ -233,7 +248,7 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
   auto it = params.getOrder().begin();
   while (it != params.getOrder().end()) {
     auto param = params[*it++];
-    auto parameter = PathItemParameter::createShared();
+    auto parameter = oas3::PathItemParameter::createShared();
     parameter->in = inType;
     parameter->name = param.name;
     parameter->description = param.description;
@@ -245,18 +260,18 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
 
 }
 
-oatpp::Object<RequestBody> Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
+oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
 
   if(endpointInfo.consumes.size() > 0) {
 
-    auto body = RequestBody::createShared();
+    auto body = oas3::RequestBody::createShared();
     body->description = "request body";
     body->content = body->content.createShared();
 
     auto it = endpointInfo.consumes.begin();
     while (it != endpointInfo.consumes.end()) {
 
-      auto mediaType = MediaTypeObject::createShared();
+      auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedTypes);
 
       body->content[it->contentType] = mediaType;
@@ -270,10 +285,10 @@ oatpp::Object<RequestBody> Generator::generateRequestBody(const Endpoint::Info& 
 
     if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
 
-      auto body = RequestBody::createShared();
+      auto body = oas3::RequestBody::createShared();
       body->description = "request body";
 
-      auto mediaType = MediaTypeObject::createShared();
+      auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
 
       body->content = {};
@@ -304,19 +319,19 @@ oatpp::Object<RequestBody> Generator::generateRequestBody(const Endpoint::Info& 
 
 }
 
-oatpp::Fields<Object<OperationResponse>> Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
+oatpp::Fields<Object<oas3::OperationResponse>> Generator::generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes) {
 
-  auto responses = Fields<Object<OperationResponse>>::createShared();
+  auto responses = Fields<Object<oas3::OperationResponse>>::createShared();
 
   if(endpointInfo.responses.size() > 0) {
 
     auto it = endpointInfo.responses.begin();
     while (it != endpointInfo.responses.end()) {
 
-      auto mediaType = MediaTypeObject::createShared();
+      auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedTypes);
 
-      auto response = OperationResponse::createShared();
+      auto response = oas3::OperationResponse::createShared();
       response->description = it->second.description.get() == nullptr ? it->first.description : it->second.description;
       response->content = {};
       response->content[it->second.contentType] = mediaType;
@@ -327,10 +342,10 @@ oatpp::Fields<Object<OperationResponse>> Generator::generateResponses(const Endp
 
   } else {
 
-    auto mediaType = MediaTypeObject::createShared();
+    auto mediaType = oas3::MediaTypeObject::createShared();
     mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedTypes);
 
-    auto response = OperationResponse::createShared();
+    auto response = oas3::OperationResponse::createShared();
     response->description = "success";
     response->content = {};
     response->content["text/plain"] = mediaType;
@@ -342,13 +357,13 @@ oatpp::Fields<Object<OperationResponse>> Generator::generateResponses(const Endp
 
 }
 
-void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
+void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<oas3::PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
 
   auto info = endpoint->info();
 
   if(info) {
 
-    auto operation = PathItemOperation::createShared();
+    auto operation = oas3::PathItemOperation::createShared();
     operation->operationId = info->name;
     operation->summary = info->summary;
     operation->description = info->description;
@@ -458,7 +473,7 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
       auto& pathItem = result[path];
       if(!pathItem) {
-        pathItem = PathItem::createShared();
+        pathItem = oas3::PathItem::createShared();
       }
 
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
@@ -482,7 +497,10 @@ void Generator::decomposeObject(const Type* type, UsedTypes& decomposedTypes) {
 
   decomposedTypes[type->nameQualifier] = type;
 
-  auto properties = type->propertiesGetter();
+  auto polymorphicDispatcher = static_cast<const oatpp::data::mapping::type::__class::AbstractObject::PolymorphicDispatcher*>(
+    type->polymorphicDispatcher
+  );
+  auto properties = polymorphicDispatcher->getProperties();
 
   for(auto* p : properties->getList()) {
     decomposeType(p->type, decomposedTypes);
@@ -547,11 +565,11 @@ Generator::UsedTypes Generator::decomposeTypes(UsedTypes& usedTypes) {
   
 }
 
-oatpp::Object<Components> Generator::generateComponents(const UsedTypes &decomposedTypes,
-                                                        const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
-                                                        UsedSecuritySchemes &usedSecuritySchemes) {
+oatpp::Object<oas3::Components> Generator::generateComponents(const UsedTypes &decomposedTypes,
+                                                              const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
+                                                              UsedSecuritySchemes &usedSecuritySchemes) {
   
-  auto result = Components::createShared();
+  auto result = oas3::Components::createShared();
   result->schemas = {};
   
   auto it = decomposedTypes.begin();
@@ -573,31 +591,8 @@ oatpp::Object<Components> Generator::generateComponents(const UsedTypes &decompo
   
 }
 
-oatpp::Object<Document> Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints) {
-  
-  auto document = oas3::Document::createShared();
-  document->info = Info::createFromBaseModel(docInfo->header);
-  
-  if(docInfo->servers) {
-    document->servers = {};
 
-    for(const auto &it : *docInfo->servers) {
-      document->servers->push_back(Server::createFromBaseModel(it));
-    }
-
-  }
-  
-  UsedTypes usedTypes;
-  UsedSecuritySchemes usedSecuritySchemes;
-  document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes);
-  auto decomposedTypes = decomposeTypes(usedTypes);
-  document->components = generateComponents(decomposedTypes, docInfo->securitySchemes, usedSecuritySchemes);
-
-  return document;
-  
-}
-
-oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss) {
+oatpp::Object<oas3::SecurityScheme> Generator::generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss) {
   auto oasSS = oatpp::swagger::oas3::SecurityScheme::createShared();
 
   oasSS->type = ss->type;
@@ -611,7 +606,7 @@ oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::share
   if(ss->flows) {
     oasSS->flows = oasSS->flows->createShared();
     if(ss->flows->implicit) {
-      oasSS->flows->implicit = OAuthFlow::createShared();
+      oasSS->flows->implicit = oas3::OAuthFlow::createShared();
       oasSS->flows->implicit->tokenUrl = ss->flows->implicit->tokenUrl;
       oasSS->flows->implicit->refreshUrl = ss->flows->implicit->refreshUrl;
       oasSS->flows->implicit->authorizationUrl = ss->flows->implicit->authorizationUrl;
@@ -623,7 +618,7 @@ oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::share
       }
     }
     if(ss->flows->password) {
-      oasSS->flows->password = OAuthFlow::createShared();
+      oasSS->flows->password = oas3::OAuthFlow::createShared();
       oasSS->flows->password->tokenUrl = ss->flows->password->tokenUrl;
       oasSS->flows->password->refreshUrl = ss->flows->password->refreshUrl;
       oasSS->flows->password->authorizationUrl = ss->flows->password->authorizationUrl;
@@ -635,7 +630,7 @@ oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::share
       }
     }
     if(ss->flows->clientCredentials) {
-      oasSS->flows->clientCredentials = OAuthFlow::createShared();
+      oasSS->flows->clientCredentials = oas3::OAuthFlow::createShared();
       oasSS->flows->clientCredentials->tokenUrl = ss->flows->clientCredentials->tokenUrl;
       oasSS->flows->clientCredentials->refreshUrl = ss->flows->clientCredentials->refreshUrl;
       oasSS->flows->clientCredentials->authorizationUrl = ss->flows->clientCredentials->authorizationUrl;
@@ -647,7 +642,7 @@ oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::share
       }
     }
     if(ss->flows->authorizationCode) {
-      oasSS->flows->authorizationCode = OAuthFlow::createShared();
+      oasSS->flows->authorizationCode = oas3::OAuthFlow::createShared();
       oasSS->flows->authorizationCode->tokenUrl = ss->flows->authorizationCode->tokenUrl;
       oasSS->flows->authorizationCode->refreshUrl = ss->flows->authorizationCode->refreshUrl;
       oasSS->flows->authorizationCode->authorizationUrl = ss->flows->authorizationCode->authorizationUrl;
@@ -662,4 +657,32 @@ oatpp::Object<SecurityScheme> Generator::generateSecurityScheme(const std::share
   return oasSS;
 }
 
-}}}
+Generator::Generator(const std::shared_ptr<Config>& config)
+  : m_config(config)
+{}
+
+oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints) {
+  
+  auto document = oas3::Document::createShared();
+  document->info = oas3::Info::createFromBaseModel(docInfo->header);
+  
+  if(docInfo->servers) {
+    document->servers = {};
+
+    for(const auto &it : *docInfo->servers) {
+      document->servers->push_back(oas3::Server::createFromBaseModel(it));
+    }
+
+  }
+  
+  UsedTypes usedTypes;
+  UsedSecuritySchemes usedSecuritySchemes;
+  document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes);
+  auto decomposedTypes = decomposeTypes(usedTypes);
+  document->components = generateComponents(decomposedTypes, docInfo->securitySchemes, usedSecuritySchemes);
+
+  return document;
+  
+}
+
+}}

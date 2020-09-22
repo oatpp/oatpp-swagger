@@ -61,6 +61,76 @@ class UserDto : public oatpp::DTO {
 
 #include OATPP_CODEGEN_END(DTO)
 
+#include OATPP_CODEGEN_BEGIN(DTO)
+
+struct VPoint {
+  v_int32 x;
+  v_int32 y;
+  v_int32 z;
+};
+
+namespace __class {
+  class PointClass;
+}
+
+typedef oatpp::data::mapping::type::Primitive<VPoint, __class::PointClass> Point;
+
+namespace __class {
+
+class PointClass {
+private:
+
+  class PointDto : public oatpp::DTO {
+
+    DTO_INIT(PointDto, DTO)
+
+    DTO_FIELD(Int32, x);
+
+    DTO_FIELD(Int32, y);
+
+    DTO_FIELD(Int32, z);
+
+  };
+
+  class Inter : public oatpp::Type::Interpretation<Point, oatpp::Object<PointDto>> {
+  public:
+
+    oatpp::Object<PointDto> interpret(const Point &value) const override {
+      auto dto = PointDto::createShared();
+      dto->x = value->x;
+      dto->y = value->y;
+      dto->z = value->z;
+      return dto;
+    }
+
+    Point reproduce(const oatpp::Object<PointDto> &value) const override {
+      return Point({value->x, value->y, value->z});
+    }
+
+  };
+
+public:
+
+  static const oatpp::ClassId CLASS_ID;
+
+  static oatpp::Type *getType() {
+    static oatpp::Type type(
+      CLASS_ID, nullptr, nullptr,
+      {
+        {"test", new Inter()}
+      }
+    );
+    return &type;
+  }
+
+};
+
+const oatpp::ClassId PointClass::CLASS_ID("test::Point");
+
+}
+
+#include OATPP_CODEGEN_END(DTO)
+
 // Handler //-------------------------------------------------------------------------
 
 class MyAuthorizationObject : public oatpp::web::server::handler::AuthorizationObject {
@@ -198,6 +268,19 @@ public:
     } else {
       return createResponse(Status::CODE_201, "Username or password invalid");
     }
+  }
+
+
+  ENDPOINT_INFO(getPoint) {
+    info->summary = "get custom type Point";
+    info->addResponse<Point>(Status::CODE_200, "application/json");
+  }
+  ENDPOINT("GET", "demo/api/point", getPoint) {
+    Point p = std::make_shared<VPoint>();
+    p->x = 1;
+    p->y = 2;
+    p->z = 3;
+    return createDtoResponse(Status::CODE_200, p);
   }
 
   /**
