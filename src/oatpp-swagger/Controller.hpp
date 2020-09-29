@@ -26,7 +26,7 @@
 #define oatpp_swagger_Controller_hpp
 
 #include "oatpp-swagger/Resources.hpp"
-#include "oatpp-swagger/oas3/Generator.hpp"
+#include "oatpp-swagger/Generator.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
 
@@ -81,8 +81,16 @@ public:
     deserializerConfig->allowUnknownFields = false;
     
     auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared(serializerConfig, deserializerConfig);
-    
-    auto document = oas3::Generator::generateDocument(documentInfo, endpointsList);
+
+    std::shared_ptr<Generator::Config> generatorConfig;
+    try {
+      generatorConfig = OATPP_GET_COMPONENT(std::shared_ptr<Generator::Config>);
+    } catch (std::runtime_error e) {
+      generatorConfig = std::make_shared<Generator::Config>();
+    }
+
+    Generator generator(generatorConfig);
+    auto document = generator.generateDocument(documentInfo, endpointsList);
     
     return std::make_shared<Controller>(objectMapper, document, resources);
   }
