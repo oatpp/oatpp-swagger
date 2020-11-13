@@ -77,7 +77,7 @@ elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_CUSTOM)
     message("OATPP_DIR_LIB --> '${OATPP_DIR_LIB}'")
 
 else()
-    message("FATAL_ERROR Unknown location to find oatpp '${OATPP_MODULES_LOCATION}'")
+    message(FATAL_ERROR "Unknown location to find oatpp '${OATPP_MODULES_LOCATION}'")
 endif()
 
 if(OATPP_DIR_LIB)
