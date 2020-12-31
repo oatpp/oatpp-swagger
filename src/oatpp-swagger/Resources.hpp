@@ -73,13 +73,17 @@ public:
    */
   static std::shared_ptr<Resources> loadResources(const oatpp::String& resDir) {
     auto res = std::make_shared<Resources>(resDir);
-    
+
     res->cacheResource("favicon-16x16.png");
     res->cacheResource("favicon-32x32.png");
     res->cacheResource("index.html");
     res->cacheResource("oauth2-redirect.html");
     res->cacheResource("swagger-ui-bundle.js");
     res->cacheResource("swagger-ui-bundle.js.map");
+    res->cacheResource("swagger-ui-es-bundle-core.js");
+    res->cacheResource("swagger-ui-es-bundle-core.js.map");
+    res->cacheResource("swagger-ui-es-bundle.js");
+    res->cacheResource("swagger-ui-es-bundle.js.map");
     res->cacheResource("swagger-ui-standalone-preset.js");
     res->cacheResource("swagger-ui-standalone-preset.js.map");
     res->cacheResource("swagger-ui.css");
