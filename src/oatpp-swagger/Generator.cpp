@@ -290,7 +290,7 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
     if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
 
       auto body = oas3::RequestBody::createShared();
-      body->description = endpointInfo.description;
+      body->description = endpointInfo.body.description;
       body->required = endpointInfo.body.required;
 
       auto mediaType = oas3::MediaTypeObject::createShared();
