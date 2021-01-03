@@ -245,9 +245,8 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
                                           UsedTypes& usedTypes)
 {
 
-  auto it = params.getOrder().begin();
-  while (it != params.getOrder().end()) {
-    auto param = params[*it++];
+  for(auto& paramName : params.getOrder()) {
+    auto param = params[paramName];
     auto parameter = oas3::PathItemParameter::createShared();
     parameter->in = inType;
     parameter->name = param.name;
@@ -255,6 +254,11 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
     parameter->required = param.required;
     parameter->deprecated = param.deprecated;
     parameter->schema = generateSchemaForType(param.type, true, usedTypes);
+
+    for(auto& ex : param.examples) {
+      parameter->addExample(ex.first, ex.second);
+    }
+
     paramsList->push_back(parameter);
   }
 

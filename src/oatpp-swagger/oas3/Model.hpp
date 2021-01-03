@@ -586,6 +586,28 @@ class PathItemParameter : public oatpp::DTO {
    * Parameter schema. &l:Schema;.
    */
   DTO_FIELD(Object<Schema>, schema);
+
+  /**
+   * Examples.
+   */
+  DTO_FIELD(Fields<Object<Example>>, examples);
+
+public:
+
+  Object<Example> addExample(const String& title, const Any& value) {
+
+    if(!examples) {
+      examples = Fields<Object<Example>>({});
+    }
+
+    auto example = Example::createShared();
+    example->value = value;
+
+    examples->push_back({title, example});
+
+    return example;
+
+  }
   
 };
 
