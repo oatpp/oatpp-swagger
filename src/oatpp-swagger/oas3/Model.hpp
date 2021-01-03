@@ -344,6 +344,11 @@ class Schema : public oatpp::DTO {
    * Ref.
    */
   DTO_FIELD(String, ref, "$ref");
+
+  /**
+   * Example.
+   */
+  DTO_FIELD(Any, example);
   
 };
 
@@ -359,6 +364,11 @@ class MediaTypeObject : public oatpp::DTO {
    * &l:Schema;.
    */
   DTO_FIELD(Object<Schema>, schema);
+
+  /**
+   * Example.
+   */
+  DTO_FIELD(Any, example);
   
 };
 
@@ -497,6 +507,11 @@ class RequestBody : public oatpp::DTO {
    * Description.
    */
   DTO_FIELD(String, description);
+
+  /**
+   * Required.
+   */
+  DTO_FIELD(Boolean, required);
 
   /**
    * &l:MediaTypeObject;.

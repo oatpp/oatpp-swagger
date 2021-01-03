@@ -265,18 +265,22 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
   if(endpointInfo.consumes.size() > 0) {
 
     auto body = oas3::RequestBody::createShared();
-    body->description = "request body";
+    body->description = endpointInfo.body.description;
+    body->required = endpointInfo.body.required;
     body->content = body->content.createShared();
 
-    auto it = endpointInfo.consumes.begin();
-    while (it != endpointInfo.consumes.end()) {
-
+    for(auto& hint : endpointInfo.consumes) {
       auto mediaType = oas3::MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(it->schema, linkSchema, usedTypes);
 
-      body->content[it->contentType] = mediaType;
+      mediaType->schema = generateSchemaForType(hint.schema, linkSchema, usedTypes);
 
-      it++;
+      if(hint.example) {
+        mediaType->example = hint.example;
+      } else {
+        mediaType->example = endpointInfo.body.example;
+      }
+
+      body->content[hint.contentType] = mediaType;
     }
 
     return body;
@@ -286,27 +290,19 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
     if(endpointInfo.body.name != nullptr && endpointInfo.body.type != nullptr) {
 
       auto body = oas3::RequestBody::createShared();
-      body->description = "request body";
+      body->description = endpointInfo.description;
+      body->required = endpointInfo.body.required;
 
       auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
+      mediaType->example = endpointInfo.body.example;
 
-      body->content = {};
+      body->content = body->content.createShared();
+
       if(endpointInfo.bodyContentType != nullptr) {
         body->content[endpointInfo.bodyContentType] = mediaType;
       } else {
-
-        OATPP_ASSERT(endpointInfo.body.type && "[oatpp-swagger::oas3::Generator::generateRequestBody()]: Error. Type should not be null.");
-
-        if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractObject::CLASS_ID.id) {
-          body->content["application/json"] = mediaType;
-        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractList::CLASS_ID.id) {
-          body->content["application/json"] = mediaType;
-        } else if(endpointInfo.body.type->classId.id == oatpp::data::mapping::type::__class::AbstractPairList::CLASS_ID.id) {
-          body->content["application/json"] = mediaType;
-        } else {
-          body->content["text/plain"] = mediaType;
-        }
+        body->content["text/plain"] = mediaType;
       }
 
       return body;
