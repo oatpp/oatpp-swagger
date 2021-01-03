@@ -344,14 +344,27 @@ class Schema : public oatpp::DTO {
    * Ref.
    */
   DTO_FIELD(String, ref, "$ref");
-
-  /**
-   * Example.
-   */
-  DTO_FIELD(Any, example);
   
 };
 
+/**
+ * Example.
+ */
+class Example : public oatpp::DTO {
+
+  DTO_INIT(Example, DTO)
+
+  /**
+   * Example value.
+   */
+  DTO_FIELD(Any, value);
+
+  /**
+   * Summary.
+   */
+  DTO_FIELD(String, summary);
+
+};
 
 /**
  * Media type object.
@@ -366,9 +379,26 @@ class MediaTypeObject : public oatpp::DTO {
   DTO_FIELD(Object<Schema>, schema);
 
   /**
-   * Example.
+   * Examples.
    */
-  DTO_FIELD(Any, example);
+  DTO_FIELD(Fields<Object<Example>>, examples);
+
+public:
+
+  Object<Example> addExample(const String& title, const Any& value) {
+
+    if(!examples) {
+      examples = Fields<Object<Example>>({});
+    }
+
+    auto example = Example::createShared();
+    example->value = value;
+
+    examples->push_back({title, example});
+
+    return example;
+
+  }
   
 };
 
@@ -556,6 +586,28 @@ class PathItemParameter : public oatpp::DTO {
    * Parameter schema. &l:Schema;.
    */
   DTO_FIELD(Object<Schema>, schema);
+
+  /**
+   * Examples.
+   */
+  DTO_FIELD(Fields<Object<Example>>, examples);
+
+public:
+
+  Object<Example> addExample(const String& title, const Any& value) {
+
+    if(!examples) {
+      examples = Fields<Object<Example>>({});
+    }
+
+    auto example = Example::createShared();
+    example->value = value;
+
+    examples->push_back({title, example});
+
+    return example;
+
+  }
   
 };
 

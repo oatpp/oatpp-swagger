@@ -245,9 +245,8 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
                                           UsedTypes& usedTypes)
 {
 
-  auto it = params.getOrder().begin();
-  while (it != params.getOrder().end()) {
-    auto param = params[*it++];
+  for(auto& paramName : params.getOrder()) {
+    auto param = params[paramName];
     auto parameter = oas3::PathItemParameter::createShared();
     parameter->in = inType;
     parameter->name = param.name;
@@ -255,6 +254,11 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
     parameter->required = param.required;
     parameter->deprecated = param.deprecated;
     parameter->schema = generateSchemaForType(param.type, true, usedTypes);
+
+    for(auto& ex : param.examples) {
+      parameter->addExample(ex.first, ex.second);
+    }
+
     paramsList->push_back(parameter);
   }
 
@@ -274,10 +278,14 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
 
       mediaType->schema = generateSchemaForType(hint.schema, linkSchema, usedTypes);
 
-      if(hint.example) {
-        mediaType->example = hint.example;
+      if(hint.examples.size() > 0) {
+        for(auto& ex : hint.examples) {
+          mediaType->addExample(ex.first, ex.second);
+        }
       } else {
-        mediaType->example = endpointInfo.body.example;
+        for(auto& ex : endpointInfo.body.examples) {
+          mediaType->addExample(ex.first, ex.second);
+        }
       }
 
       body->content[hint.contentType] = mediaType;
@@ -295,7 +303,9 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
 
       auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
-      mediaType->example = endpointInfo.body.example;
+      for(auto& ex : endpointInfo.body.examples) {
+        mediaType->addExample(ex.first, ex.second);
+      }
 
       body->content = body->content.createShared();
 
@@ -321,19 +331,21 @@ oatpp::Fields<Object<oas3::OperationResponse>> Generator::generateResponses(cons
 
   if(endpointInfo.responses.size() > 0) {
 
-    auto it = endpointInfo.responses.begin();
-    while (it != endpointInfo.responses.end()) {
+    for(auto& hint : endpointInfo.responses) {
 
       auto mediaType = oas3::MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(it->second.schema, linkSchema, usedTypes);
+      mediaType->schema = generateSchemaForType(hint.second.schema, linkSchema, usedTypes);
+
+      for(auto& ex : hint.second.examples) {
+        mediaType->addExample(ex.first, ex.second);
+      }
 
       auto response = oas3::OperationResponse::createShared();
-      response->description = it->second.description.get() == nullptr ? it->first.description : it->second.description;
+      response->description = hint.second.description.get() == nullptr ? hint.first.description : hint.second.description;
       response->content = {};
-      response->content[it->second.contentType] = mediaType;
-      responses[oatpp::utils::conversion::int32ToStr(it->first.code)] = response;
+      response->content[hint.second.contentType] = mediaType;
+      responses[oatpp::utils::conversion::int32ToStr(hint.first.code)] = response;
 
-      it++;
     }
 
   } else {
