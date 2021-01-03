@@ -274,10 +274,14 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
 
       mediaType->schema = generateSchemaForType(hint.schema, linkSchema, usedTypes);
 
-      if(hint.example) {
-        mediaType->example = hint.example;
+      if(hint.examples.size() > 0) {
+        for(auto& ex : hint.examples) {
+          mediaType->addExample(ex.first, ex.second);
+        }
       } else {
-        mediaType->example = endpointInfo.body.example;
+        for(auto& ex : endpointInfo.body.examples) {
+          mediaType->addExample(ex.first, ex.second);
+        }
       }
 
       body->content[hint.contentType] = mediaType;
@@ -295,7 +299,9 @@ oatpp::Object<oas3::RequestBody> Generator::generateRequestBody(const Endpoint::
 
       auto mediaType = oas3::MediaTypeObject::createShared();
       mediaType->schema = generateSchemaForType(endpointInfo.body.type, linkSchema, usedTypes);
-      mediaType->example = endpointInfo.body.example;
+      for(auto& ex : endpointInfo.body.examples) {
+        mediaType->addExample(ex.first, ex.second);
+      }
 
       body->content = body->content.createShared();
 
