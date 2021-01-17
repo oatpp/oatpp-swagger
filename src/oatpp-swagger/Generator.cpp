@@ -40,7 +40,7 @@ oatpp::String Generator::getEnumSchemaName(const Type* type) {
   Type* interType = polymorphicDispatcher->getInterpretationType();
 
   data::stream::BufferOutputStream stream;
-  stream << type->nameQualifier << "(" << interType->classId.name << ")";
+  stream << type->nameQualifier << "_" << interType->classId.name;
   return stream.toString();
 
 }
