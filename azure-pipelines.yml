@@ -158,34 +158,34 @@ jobs:
         workingDirectory: build\test\Debug\
 
   - job: windows-2019
-      displayName: 'Build - Windows windows-2019'
-      continueOnError: false
-      pool:
-        vmImage: 'windows-2019'
-      workspace:
-        clean: all
-      steps:
-        - script: |
-            MD build
-        - script: |
-            git clone https://github.com/oatpp/oatpp
-            MD oatpp\build
-          displayName: 'Checkout - oatpp'
-          workingDirectory: build
-        - script: |
-            cmake ..
-            cmake --build . --target INSTALL
-          displayName: 'Build - oatpp'
-          workingDirectory: build\oatpp\build
+    displayName: 'Build - Windows windows-2019'
+    continueOnError: false
+    pool:
+      vmImage: 'windows-2019'
+    workspace:
+      clean: all
+    steps:
+      - script: |
+          MD build
+      - script: |
+          git clone https://github.com/oatpp/oatpp
+          MD oatpp\build
+        displayName: 'Checkout - oatpp'
+        workingDirectory: build
+      - script: |
+          cmake ..
+          cmake --build . --target INSTALL
+        displayName: 'Build - oatpp'
+        workingDirectory: build\oatpp\build
 
-        - script: |
-            cmake ..
-            cmake --build .
-          displayName: 'Build - module'
-          workingDirectory: build
+      - script: |
+          cmake ..
+          cmake --build .
+        displayName: 'Build - module'
+        workingDirectory: build
 
-        - script: |
-            module-tests.exe
-          displayName: 'Test'
-          workingDirectory: build\test\Debug\
+      - script: |
+          module-tests.exe
+        displayName: 'Test'
+        workingDirectory: build\test\Debug\
 
