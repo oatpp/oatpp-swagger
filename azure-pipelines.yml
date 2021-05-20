@@ -34,6 +34,36 @@ jobs:
         displayName: 'Test'
         workingDirectory: build
 
+  - job: ubuntu_18_04
+    displayName: 'Build - Ubuntu 18.04'
+    continueOnError: false
+    pool:
+      vmImage: 'Ubuntu 18.04'
+    workspace:
+      clean: all
+    steps:
+      - script: |
+          mkdir build
+      - script: |
+          git clone https://github.com/oatpp/oatpp
+          mkdir -p oatpp/build
+        displayName: 'Checkout - oatpp'
+        workingDirectory: build
+      - script: |
+          cmake ..
+          sudo make install
+        displayName: 'Build - oatpp'
+        workingDirectory: build/oatpp/build
+      - script: |
+          cmake ..
+          make
+        displayName: 'Build - module'
+        workingDirectory: build
+      - script: |
+          make test ARGS="-V"
+        displayName: 'Test'
+        workingDirectory: build
+
   - job: macOS
     displayName: 'Build - macOS'
     continueOnError: false
