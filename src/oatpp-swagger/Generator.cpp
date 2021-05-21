@@ -496,6 +496,8 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
 void Generator::decomposeObject(const Type* type, UsedTypes& decomposedTypes) {
 
+  OATPP_LOGD("DEBUG", "type-name='%s', type-nameQualifier='%s'", type->classId.name, type->nameQualifier);
+
   OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::decomposeObject()]: Error. Type should not be null.");
 
   auto schemaIt = decomposedTypes.find(type->nameQualifier);
@@ -503,14 +505,20 @@ void Generator::decomposeObject(const Type* type, UsedTypes& decomposedTypes) {
     return;
   }
 
+  OATPP_LOGD("DEBUG", "No existing schema");
+
   decomposedTypes[type->nameQualifier] = type;
 
   auto polymorphicDispatcher = static_cast<const oatpp::data::mapping::type::__class::AbstractObject::PolymorphicDispatcher*>(
     type->polymorphicDispatcher
   );
+
   auto properties = polymorphicDispatcher->getProperties();
 
-  for(auto* p : properties->getList()) {
+  OATPP_LOGD("DEBUG", "properties-count=%d", properties->getList().size());
+
+  for(auto p : properties->getList()) {
+    OATPP_LOGD("DEBUG", "property: name='%s', type='%s'", p->name, p->type->classId.name);
     decomposeType(p->type, decomposedTypes);
   }
 
