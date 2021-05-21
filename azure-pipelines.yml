@@ -125,7 +125,7 @@ jobs:
         workingDirectory: build
 
 
-  - job: windows_vs2017-win2016
+  - job: windows_vs2017_win2016
     displayName: 'Build - Windows vs2017-win2016'
     continueOnError: false
     pool:
@@ -157,7 +157,7 @@ jobs:
         displayName: 'Test'
         workingDirectory: build\test\Debug\
 
-  - job: windows-2019
+  - job: windows_2019
     displayName: 'Build - Windows windows-2019'
     continueOnError: false
     pool:
