@@ -38,13 +38,19 @@ if(OATPP_INSTALL)
     include("../cmake/module-install.cmake")
 
     if(OATPP_INSTALL_SWAGGER_UI)
+        if (WIN32)
+            set(OATPP_SWAGGER_UI_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/oatpp-${OATPP_MODULE_VERSION}" CACHE STRING "SwaggerUI installation directory")
+        else()
+            set(OATPP_SWAGGER_UI_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/oatpp-${OATPP_MODULE_VERSION}/${OATPP_MODULE_NAME}" CACHE STRING "SwaggerUI installation directory")
+        endif()
+
         ## install swagger-ui files
         install(DIRECTORY ../res
-                DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/oatpp-${OATPP_MODULE_VERSION}/bin/${OATPP_MODULE_NAME}"
+                DESTINATION "${OATPP_SWAGGER_UI_INSTALL_DIR}"
                 FILES_MATCHING PATTERN "*.*"
         )
 
         ## set environment variable to point to swagger-ui res files
-        set(ENV{OATPP_SWAGGER_RES_PATH} "${CMAKE_INSTALL_INCLUDEDIR}/oatpp-${OATPP_MODULE_VERSION}/bin/${OATPP_MODULE_NAME}/res")
+        set(ENV{OATPP_SWAGGER_RES_PATH} "${OATPP_SWAGGER_UI_INSTALL_DIR}/res")
     endif()
 endif()
