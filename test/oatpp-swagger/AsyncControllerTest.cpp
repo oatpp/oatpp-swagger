@@ -63,12 +63,9 @@ void AsyncControllerTest::onRun() {
   SwaggerComponent swaggerComponent;
 
   // Create controllers and generate api docs
-  auto docEndpoints = oatpp::swagger::AsyncController::Endpoints::createShared();
-
   auto controller = TestAsyncController::createShared(objectMapper);
-  docEndpoints->pushBackAll(controller->getEndpoints());
 
-  auto swaggerController = oatpp::swagger::AsyncController::createShared(docEndpoints);
+  auto swaggerController = oatpp::swagger::AsyncController::createShared(controller->getEndpoints());
 
   // TODO test generated document here
   OATPP_LOGV(TAG, "TODO implement test");

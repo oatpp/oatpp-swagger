@@ -74,12 +74,9 @@ void ControllerTest::onRun() {
   SwaggerComponent swaggerComponent;
 
   // Create controllers and generate api docs
-  auto docEndpoints = oatpp::swagger::Controller::Endpoints::createShared();
-
   auto controller = TestController::createShared(objectMapper);
-  docEndpoints->pushBackAll(controller->getEndpoints());
 
-  auto swaggerController = oatpp::swagger::Controller::createShared(docEndpoints);
+  auto swaggerController = oatpp::swagger::Controller::createShared(controller->getEndpoints());
 
   { // OAS-Doc
 

@@ -7,6 +7,7 @@
  *
  *
  * Copyright 2018-present, Leonid Stryzhevskyi, <lganzzzo@gmail.com>
+ *                         Benedikt-Alexander Mokroß, <github@bamkrs.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +29,6 @@
 #include "oatpp-swagger/oas3/Model.hpp"
 
 #include "oatpp/web/server/api/Endpoint.hpp"
-#include "oatpp/core/collection/LinkedList.hpp"
 
 #include <unordered_map>
 
@@ -48,7 +48,7 @@ public:
   /**
    * Convenience typedef for list of &l:Generator::Endpoint;.
    */
-  typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
+  typedef std::list<std::shared_ptr<Endpoint>> Endpoints;
 
   typedef oatpp::List<Object<oas3::PathItemParameter>> PathItemParameters;
   
