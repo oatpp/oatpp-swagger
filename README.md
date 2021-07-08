@@ -78,7 +78,14 @@ OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, swaggerDoc
  */
 OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, swaggerResources)([] {
   // Make sure to specify correct full path to oatpp-swagger/res folder !!!
-  return oatpp::swagger::Resources::loadResources("<YOUR-PATH-TO-REPO>/lib/oatpp-swagger/res");
+  // If you have 'installed' oatpp-swagger these folders would be:
+  // On *nix OS's SwaggerUI are installed to <install-prefix>/share/oatpp-<version>/oatpp-swagger/res/ (with <install-prefix> defaulting /usr/local).
+  // On Windows SwaggerUI areinstalled to <install-prefix>/oatpp-<version>/res/ (with <install-prefix> defaulting to "c:/Program Files/${PROJECT_NAME}")
+
+  // Uncomment to chose one of the default installation paths or select your own:
+  // return oatpp::swagger::Resources::loadResources("/usr/local/share/oatpp-1.2.5/oatpp-swagger/res");
+  // return oatpp::swagger::Resources::loadResources("c:/Program Files/oatpp-swagger/oatpp-1.2.5/res");  
+  // return oatpp::swagger::Resources::loadResources(OATPP_SWAGGER_RES_PATH);
 }());
 
 ```
