@@ -467,9 +467,7 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
   auto result = Paths::createShared();
 
-  auto curr = endpoints->begin();
-  while (curr != endpoints->end()) {
-    auto endpoint = *curr;
+  for (const auto& endpoint : *endpoints) {
 
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
@@ -488,7 +486,6 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
     }
 
-    curr++;
   }
 
   return result;
