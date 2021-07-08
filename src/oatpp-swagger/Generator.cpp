@@ -7,6 +7,7 @@
  *
  *
  * Copyright 2018-present, Leonid Stryzhevskyi, <lganzzzo@gmail.com>
+ *                         Benedikt-Alexander Mokroß, <github@bamkrs.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -466,9 +467,7 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
   auto result = Paths::createShared();
 
-  auto curr = endpoints->getFirstNode();
-  while (curr != nullptr) {
-    auto endpoint = curr->getData();
+  for (const auto& endpoint : *endpoints) {
 
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
@@ -487,7 +486,6 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
     }
 
-    curr = curr->getNext();
   }
 
   return result;

@@ -15,7 +15,7 @@ jobs:
       - script: |
           mkdir build
       - script: |
-          git clone https://github.com/oatpp/oatpp
+          git clone --branch v1.3.0 https://github.com/oatpp/oatpp
           mkdir -p oatpp/build
         displayName: 'Checkout - oatpp'
         workingDirectory: build
@@ -45,7 +45,7 @@ jobs:
       - script: |
           mkdir build
       - script: |
-          git clone https://github.com/oatpp/oatpp
+          git clone --branch v1.3.0 https://github.com/oatpp/oatpp
           mkdir -p oatpp/build
         displayName: 'Checkout - oatpp'
         workingDirectory: build
@@ -76,7 +76,7 @@ jobs:
       - script: |
           MD build
       - script: |
-          git clone https://github.com/oatpp/oatpp
+          git clone --branch v1.3.0 https://github.com/oatpp/oatpp
           MD oatpp\build
         displayName: 'Checkout - oatpp'
         workingDirectory: build
