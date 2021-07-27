@@ -129,6 +129,13 @@ oatpp::Object<oas3::Schema> Generator::generateSchemaForTypeObject(const Type* t
       result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, defaultValue);
     }
 
+    result->required = oatpp::List<oatpp::String>::createShared();
+    for (auto* p : properties->getList()) {
+      if (p->info.required) {
+        result->required->push_back(p->name);
+      }
+    }
+
     return result;
   }
 
@@ -146,7 +153,7 @@ oatpp::Object<oas3::Schema> Generator::generateSchemaForCollection_1D(const Type
 }
 
 oatpp::Object<oas3::Schema> Generator::generateSchemaForEnum(const Type* type, bool linkSchema, UsedTypes& usedTypes, oatpp::BaseObject::Property* property) {
-  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForTypeObject()]: Error. Type should not be null.");
+  OATPP_ASSERT(type && "[oatpp-swagger::oas3::Generator::generateSchemaForEnum()]: Error. Type should not be null.");
 
   if(linkSchema) {
 
