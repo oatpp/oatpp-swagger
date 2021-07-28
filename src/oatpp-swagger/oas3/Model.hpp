@@ -341,6 +341,11 @@ class Schema : public oatpp::DTO {
   DTO_FIELD(List<Any>, enumValues, "enum");
 
   /**
+   * List of required fields.
+   */
+  DTO_FIELD(List<String>, required, "required");
+
+  /**
    * Ref.
    */
   DTO_FIELD(String, ref, "$ref");
