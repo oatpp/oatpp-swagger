@@ -371,7 +371,6 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   auto info = endpoint->info();
 
   if(info) {
-
     auto operation = oas3::PathItemOperation::createShared();
     operation->operationId = info->name;
     operation->summary = info->summary;
@@ -384,21 +383,21 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       }
     }
 
-    if(oatpp::base::StrBuffer::equalsCI("get", info->method->c_str(), info->method->getSize())) {
+    if(info->method.equalsCI("GET")) {
       pathItem->operationGet = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("put", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("put")) {
       pathItem->operationPut = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("post", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("post")) {
       pathItem->operationPost = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("delete", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("delete")) {
       pathItem->operationDelete = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("options", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("options")) {
       pathItem->operationOptions = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("head", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("head")) {
       pathItem->operationHead = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("patch", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("patch")) {
       pathItem->operationPatch = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("trace", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI("trace")) {
       pathItem->operationTrace = operation;
     }
 
@@ -471,10 +470,11 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
-      if(path->getSize() == 0) {
+
+      if(path->size() == 0) {
         continue;
       }
-      if(path->getData()[0] != '/') {
+      if(path->at(0) != '/') {
         path = "/" + path;
       }
 
@@ -555,29 +555,29 @@ void Generator::decomposeType(const Type* type, UsedTypes& decomposedTypes) {
     decomposeEnum(type, decomposedTypes);
   }
 }
-  
+
 Generator::UsedTypes Generator::decomposeTypes(UsedTypes& usedTypes) {
-  
+
   UsedTypes result; // decomposed schemas
-  
+
   auto it = usedTypes.begin();
   while (it != usedTypes.end()) {
     decomposeType(it->second, result);
     result[it->first] = it->second;
     it ++;
   }
-  
+
   return result;
-  
+
 }
 
 oatpp::Object<oas3::Components> Generator::generateComponents(const UsedTypes &decomposedTypes,
                                                               const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
                                                               UsedSecuritySchemes &usedSecuritySchemes) {
-  
+
   auto result = oas3::Components::createShared();
   result->schemas = {};
-  
+
   auto it = decomposedTypes.begin();
   while (it != decomposedTypes.end()) {
     UsedTypes schemas; ///< dummy
@@ -594,7 +594,7 @@ oatpp::Object<oas3::Components> Generator::generateComponents(const UsedTypes &d
   }
 
   return result;
-  
+
 }
 
 
@@ -668,10 +668,10 @@ Generator::Generator(const std::shared_ptr<Config>& config)
 {}
 
 oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints) {
-  
+
   auto document = oas3::Document::createShared();
   document->info = oas3::Info::createFromBaseModel(docInfo->header);
-  
+
   if(docInfo->servers) {
     document->servers = {};
 
@@ -680,7 +680,7 @@ oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<
     }
 
   }
-  
+
   UsedTypes usedTypes;
   UsedSecuritySchemes usedSecuritySchemes;
   document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes);
@@ -688,7 +688,7 @@ oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<
   document->components = generateComponents(decomposedTypes, docInfo->securitySchemes, usedSecuritySchemes);
 
   return document;
-  
+
 }
 
 }}
