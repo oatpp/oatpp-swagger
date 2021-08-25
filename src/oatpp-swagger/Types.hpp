@@ -29,7 +29,7 @@
 #include "oatpp/core/Types.hpp"
 
 namespace oatpp { namespace swagger {
-  
+
 namespace __class {
 
   /**
@@ -51,18 +51,21 @@ namespace __class {
       static oatpp::data::mapping::type::Type type(CLASS_ID, "binary");
       return &type;
     }
-    
+
   };
-  
+
 }
 
 /**
  * Typedef for Binary. It is used to indicate file upload in Swagger-UI. <br>
  * Usage example: `info->addConsumes<oatpp::swagger::Binary>("application/octet-stream");`.<br>
  * For more info see: [Endpoint Annotation And API Documentation](/docs/components/api-controller/#endpoint-annotation-and-api-documentation).
+ *
+ *
+ * warning: using a string as replacement for binary might lead to problems with the NUL-character.
  */
-typedef oatpp::data::mapping::type::ObjectWrapper<oatpp::base::StrBuffer, __class::Binary> Binary;
-  
+typedef oatpp::data::mapping::type::ObjectWrapper<oatpp::String, __class::Binary> Binary;
+
 }}
 
 #endif /* oatpp_swagger_Types_hpp */
