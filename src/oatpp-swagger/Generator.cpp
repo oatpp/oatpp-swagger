@@ -383,21 +383,21 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       }
     }
 
-    if(info->method.equalsCI("GET")) {
+    if(info->method.equalsCI_ASCII("GET")) {
       pathItem->operationGet = operation;
-    } else if(info->method.equalsCI("put")) {
+    } else if(info->method.equalsCI_ASCII("put")) {
       pathItem->operationPut = operation;
-    } else if(info->method.equalsCI("post")) {
+    } else if(info->method.equalsCI_ASCII("post")) {
       pathItem->operationPost = operation;
-    } else if(info->method.equalsCI("delete")) {
+    } else if(info->method.equalsCI_ASCII("delete")) {
       pathItem->operationDelete = operation;
-    } else if(info->method.equalsCI("options")) {
+    } else if(info->method.equalsCI_ASCII("options")) {
       pathItem->operationOptions = operation;
-    } else if(info->method.equalsCI("head")) {
+    } else if(info->method.equalsCI_ASCII("head")) {
       pathItem->operationHead = operation;
-    } else if(info->method.equalsCI("patch")) {
+    } else if(info->method.equalsCI_ASCII("patch")) {
       pathItem->operationPatch = operation;
-    } else if(info->method.equalsCI("trace")) {
+    } else if(info->method.equalsCI_ASCII("trace")) {
       pathItem->operationTrace = operation;
     }
 
