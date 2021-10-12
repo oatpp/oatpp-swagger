@@ -22,6 +22,7 @@ option(OATPP_DIR_SRC "Path to oatpp module directory (sources)")
 option(OATPP_DIR_LIB "Path to directory with liboatpp (directory containing ex: liboatpp.so or liboatpp.dynlib)")
 option(OATPP_BUILD_TESTS "Build tests for this module" ON)
 option(OATPP_INSTALL "Install module binaries" ON)
+option(OATPP_MSVC_LINK_STATIC_RUNTIME "MSVC: Link with static runtime (/MT and /MTd)." OFF)
 
 set(OATPP_MODULES_LOCATION "INSTALLED" CACHE STRING "Location where to find oatpp modules. can be [INSTALLED|EXTERNAL|CUSTOM]")
 
@@ -99,9 +100,12 @@ message("\n#####################################################################
 
 include(cmake/module-utils.cmake)
 
-add_subdirectory("src")
+include(cmake/msvc-runtime.cmake)
+configure_msvc_runtime()
+
+add_subdirectory(src)
 
 if(OATPP_BUILD_TESTS)
     enable_testing()
-    add_subdirectory("test")
+    add_subdirectory(test)
 endif()
