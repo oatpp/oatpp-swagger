@@ -30,12 +30,12 @@ namespace oatpp { namespace swagger {
   
 Resources::Resources(const oatpp::String& resDir, bool streaming) {
   
-  if(!resDir || resDir->getSize() == 0) {
+  if(!resDir || resDir->size() == 0) {
     throw std::runtime_error("[oatpp::swagger::Resources::Resources()]: Invalid resDir path. Please specify full path to oatpp-swagger/res folder");
   }
   
   m_resDir = resDir;
-  if(m_resDir->getData()[m_resDir->getSize() - 1] != '/') {
+  if(m_resDir->data()[m_resDir->size() - 1] != '/') {
     m_resDir = m_resDir + "/";
   }
 
@@ -57,7 +57,7 @@ oatpp::String Resources::loadFromFile(const char* fileName) {
     
     auto result = oatpp::String((v_int32) file.tellg());
     file.seekg(0, std::ios::beg);
-    file.read((char*)result->getData(), result->getSize());
+    file.read((char*)result->data(), result->size());
     file.close();
     return result;
     

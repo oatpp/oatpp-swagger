@@ -28,8 +28,8 @@
 #include "oatpp-swagger/oas3/Model.hpp"
 
 #include "oatpp/web/server/api/Endpoint.hpp"
-#include "oatpp/core/collection/LinkedList.hpp"
 
+#include <list>
 #include <unordered_map>
 
 namespace oatpp { namespace swagger {
@@ -48,7 +48,7 @@ public:
   /**
    * Convenience typedef for list of &l:Generator::Endpoint;.
    */
-  typedef oatpp::collection::LinkedList<std::shared_ptr<Endpoint>> Endpoints;
+  typedef std::list<std::shared_ptr<Endpoint>> Endpoints;
 
   typedef oatpp::List<Object<oas3::PathItemParameter>> PathItemParameters;
   

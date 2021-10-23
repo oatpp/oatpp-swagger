@@ -74,10 +74,10 @@ void ControllerTest::onRun() {
   SwaggerComponent swaggerComponent;
 
   // Create controllers and generate api docs
-  auto docEndpoints = oatpp::swagger::Controller::Endpoints::createShared();
+  auto docEndpoints = std::make_shared<oatpp::swagger::Controller::Endpoints>();
 
   auto controller = TestController::createShared(objectMapper);
-  docEndpoints->pushBackAll(controller->getEndpoints());
+  docEndpoints->insert(docEndpoints->end(), controller->getEndpoints()->begin(), controller->getEndpoints()->end());
 
   auto swaggerController = oatpp::swagger::Controller::createShared(docEndpoints);
 

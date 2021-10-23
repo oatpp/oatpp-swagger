@@ -390,21 +390,21 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       }
     }
 
-    if(oatpp::base::StrBuffer::equalsCI("get", info->method->c_str(), info->method->getSize())) {
+    if(info->method.equalsCI_ASCII("get")) {
       pathItem->operationGet = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("put", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("put")) {
       pathItem->operationPut = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("post", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("post")) {
       pathItem->operationPost = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("delete", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("delete")) {
       pathItem->operationDelete = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("options", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("options")) {
       pathItem->operationOptions = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("head", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("head")) {
       pathItem->operationHead = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("patch", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("patch")) {
       pathItem->operationPatch = operation;
-    } else if(oatpp::base::StrBuffer::equalsCI("trace", info->method->c_str(), info->method->getSize())) {
+    } else if(info->method.equalsCI_ASCII("trace")) {
       pathItem->operationTrace = operation;
     }
 
@@ -473,16 +473,13 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
   auto result = Paths::createShared();
 
-  auto curr = endpoints->getFirstNode();
-  while (curr != nullptr) {
-    auto endpoint = curr->getData();
-
+  for(auto& endpoint : *endpoints) {
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
-      if(path->getSize() == 0) {
+      if(path->size() == 0) {
         continue;
       }
-      if(path->getData()[0] != '/') {
+      if(path->data()[0] != '/') {
         path = "/" + path;
       }
 
@@ -493,8 +490,6 @@ Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endp
 
       generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
     }
-
-    curr = curr->getNext();
   }
 
   return result;

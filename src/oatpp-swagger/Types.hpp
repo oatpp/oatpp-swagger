@@ -61,7 +61,7 @@ namespace __class {
  * Usage example: `info->addConsumes<oatpp::swagger::Binary>("application/octet-stream");`.<br>
  * For more info see: [Endpoint Annotation And API Documentation](/docs/components/api-controller/#endpoint-annotation-and-api-documentation).
  */
-typedef oatpp::data::mapping::type::ObjectWrapper<oatpp::base::StrBuffer, __class::Binary> Binary;
+typedef oatpp::data::mapping::type::ObjectWrapper<std::string, __class::Binary> Binary;
   
 }}
 
