@@ -48,7 +48,7 @@ public:
   /**
    * Convenience typedef for list of &l:Generator::Endpoint;.
    */
-  typedef std::list<std::shared_ptr<Endpoint>> Endpoints;
+  typedef oatpp::web::server::api::Endpoints Endpoints;
 
   typedef oatpp::List<Object<oas3::PathItemParameter>> PathItemParameters;
   
@@ -81,7 +81,7 @@ private:
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  Paths generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+  Paths generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
 
   oatpp::Object<oas3::SecurityScheme> generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
@@ -119,7 +119,7 @@ public:
    * @param endpoints &l:Generator::Endpoints;.
    * @return - &id:oatpp::swagger::oas3::Document;.
    */
-  oatpp::Object<oas3::Document> generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints);
+  oatpp::Object<oas3::Document> generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const Endpoints& endpoints);
 
 };
   

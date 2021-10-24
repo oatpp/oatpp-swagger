@@ -65,12 +65,12 @@ public:
 
   /**
    * Create shared Controller.
-   * @param endpointsList - &id:oatpp::web::server::api::ApiController::Endpoints;
+   * @param endpointsList - &id:oatpp::web::server::api::Endpoints;
    * @param documentInfo - &id:oatpp::swagger::DocumentInfo;.
    * @param resources - &id:oatpp::swagger::Resources;.
    * @return - Controller.
    */
-  static std::shared_ptr<Controller> createShared(const std::shared_ptr<Endpoints>& endpointsList,
+  static std::shared_ptr<Controller> createShared(const web::server::api::Endpoints& endpointsList,
                                                   OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::DocumentInfo>, documentInfo),
                                                   OATPP_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, resources)){
     

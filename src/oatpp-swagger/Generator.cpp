@@ -469,11 +469,11 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   }
 }
 
-Generator::Paths Generator::generatePaths(const std::shared_ptr<Endpoints>& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
+Generator::Paths Generator::generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
 
   auto result = Paths::createShared();
 
-  for(auto& endpoint : *endpoints) {
+  for(auto& endpoint : endpoints.list) {
     if(endpoint->info() && !endpoint->info()->hide) {
       oatpp::String path = endpoint->info()->path;
       if(path->size() == 0) {
@@ -671,7 +671,7 @@ Generator::Generator(const std::shared_ptr<Config>& config)
   : m_config(config)
 {}
 
-oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const std::shared_ptr<Endpoints>& endpoints) {
+oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<oatpp::swagger::DocumentInfo>& docInfo, const Endpoints& endpoints) {
   
   auto document = oas3::Document::createShared();
   document->info = oas3::Info::createFromBaseModel(docInfo->header);
