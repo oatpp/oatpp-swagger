@@ -109,18 +109,21 @@ private:
 
   };
 
+private:
+
+  static oatpp::Type* createType() {
+    oatpp::Type::Info info;
+    info.interpretationMap = {{"test", new Inter()}};
+    return new oatpp::Type(CLASS_ID, info);
+  }
+
 public:
 
   static const oatpp::ClassId CLASS_ID;
 
   static oatpp::Type *getType() {
-    static oatpp::Type type(
-      CLASS_ID, nullptr, nullptr,
-      {
-        {"test", new Inter()}
-      }
-    );
-    return &type;
+    static oatpp::Type* type = createType();
+    return type;
   }
 
 };

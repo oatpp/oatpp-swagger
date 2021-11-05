@@ -36,6 +36,14 @@ namespace __class {
    * Binary type class info.
    */
   class Binary {
+  private:
+
+    static oatpp::Type* createType() {
+      oatpp::Type::Info info;
+      info.nameQualifier = "binary";
+      return new oatpp::Type(CLASS_ID, info);
+    }
+
   public:
 
     /**
@@ -47,9 +55,9 @@ namespace __class {
      * Get type information.
      * @return - &id:oatpp::data::mapping::type::Type;.
      */
-    static oatpp::data::mapping::type::Type* getType(){
-      static oatpp::data::mapping::type::Type type(CLASS_ID, "binary");
-      return &type;
+    static oatpp::Type* getType(){
+      static oatpp::Type* type = createType();
+      return type;
     }
     
   };
