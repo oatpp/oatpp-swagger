@@ -84,7 +84,7 @@ void ControllerTest::onRun() {
   { // OAS-Doc
 
     // Get api json from swaggerController
-    oatpp::data::stream::ChunkedBuffer stream;
+    oatpp::data::stream::BufferOutputStream stream;
     stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->api();
@@ -108,7 +108,7 @@ void ControllerTest::onRun() {
 
   { // index.html test
     // Get index.html from swaggerController
-    oatpp::data::stream::ChunkedBuffer stream;
+    oatpp::data::stream::BufferOutputStream stream;
     stream.setOutputStreamIOMode(oatpp::data::stream::IOMode::BLOCKING);
 
     auto response = swaggerController->getUIRoot();
