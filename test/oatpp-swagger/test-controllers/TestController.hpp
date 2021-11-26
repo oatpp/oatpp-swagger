@@ -252,6 +252,7 @@ public:
     info->summary = "Delete User by userId";
     info->addResponse<String>(Status::CODE_200, "text/plain");
     info->addResponse<String>(Status::CODE_404, "text/plain");
+    info->addResponse(Status::CODE_500);
   }
   ENDPOINT("DELETE", "demo/api/users/{userId}", deleteUser,
            PATH(Int32, userId)) {
