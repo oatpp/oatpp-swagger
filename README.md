@@ -31,6 +31,7 @@ ENDPOINT_INFO(createUser) {
   info->summary = "Create new User";
   info->addConsumes<UserDto>("application/json");
   info->addResponse<UserDto>(Status::CODE_200, "application/json");
+  info->addResponse(Status::CODE_500);
 }
 ENDPOINT("POST", "demo/api/users", createUser,
          BODY_DTO(UserDto, userDto)) {

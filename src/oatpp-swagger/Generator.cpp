@@ -340,30 +340,31 @@ oatpp::Fields<Object<oas3::OperationResponse>> Generator::generateResponses(cons
 
     for(auto& hint : endpointInfo.responses) {
 
-      auto mediaType = oas3::MediaTypeObject::createShared();
-      mediaType->schema = generateSchemaForType(hint.second.schema, linkSchema, usedTypes);
+      auto response = oas3::OperationResponse::createShared();
 
-      for(auto& ex : hint.second.examples) {
-        mediaType->addExample(ex.first, ex.second);
+      if(hint.second.schema != nullptr) {
+
+        auto mediaType = oas3::MediaTypeObject::createShared();
+        mediaType->schema = generateSchemaForType(hint.second.schema, linkSchema, usedTypes);
+
+        for(auto& ex : hint.second.examples) {
+          mediaType->addExample(ex.first, ex.second);
+        }
+
+        response->content = {};
+        response->content[hint.second.contentType] = mediaType;
+
       }
 
-      auto response = oas3::OperationResponse::createShared();
       response->description = hint.second.description.get() == nullptr ? hint.first.description : hint.second.description;
-      response->content = {};
-      response->content[hint.second.contentType] = mediaType;
       responses[oatpp::utils::conversion::int32ToStr(hint.first.code)] = response;
 
     }
 
   } else {
 
-    auto mediaType = oas3::MediaTypeObject::createShared();
-    mediaType->schema = generateSchemaForType(oatpp::String::Class::getType(), linkSchema, usedTypes);
-
     auto response = oas3::OperationResponse::createShared();
     response->description = "success";
-    response->content = {};
-    response->content["text/plain"] = mediaType;
     responses["200"] = response;
 
   }
