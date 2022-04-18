@@ -35,6 +35,13 @@
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
 
+#ifndef SWAGGER_ROOT_PATH
+#define SWAGGER_ROOT_PATH "/swagger"
+#endif
+#ifndef SWAGGER_UI_PATH
+#define SWAGGER_UI_PATH "/ui"
+#endif
+
 namespace oatpp { namespace swagger {
 
 /**
@@ -108,7 +115,7 @@ public:
     
   };
   
-  ENDPOINT_ASYNC("GET", "/swagger/ui", GetUIRoot) {
+  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH SWAGGER_UI_PATH, GetUIRoot) {
     
     ENDPOINT_ASYNC_INIT(GetUIRoot)
     
@@ -118,7 +125,7 @@ public:
     
   };
   
-  ENDPOINT_ASYNC("GET", "/swagger/{filename}", GetUIResource) {
+  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH "/{filename}", GetUIResource) {
     
     ENDPOINT_ASYNC_INIT(GetUIResource)
     

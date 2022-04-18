@@ -36,6 +36,13 @@
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
 
+#ifndef SWAGGER_ROOT_PATH
+#define SWAGGER_ROOT_PATH "/swagger"
+#endif
+#ifndef SWAGGER_UI_PATH
+#define SWAGGER_UI_PATH "/ui"
+#endif
+
 namespace oatpp { namespace swagger {
 
 /**
@@ -101,7 +108,7 @@ public:
     return createDtoResponse(Status::CODE_200, m_document);
   }
   
-  ENDPOINT("GET", "/swagger/ui", getUIRoot) {
+  ENDPOINT("GET", SWAGGER_ROOT_PATH SWAGGER_UI_PATH, getUIRoot) {
     if(m_resources->isStreaming()) {
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
         m_resources->getResourceStream("index.html")
@@ -111,7 +118,7 @@ public:
     return createResponse(Status::CODE_200, m_resources->getResource("index.html"));
   }
   
-  ENDPOINT("GET", "/swagger/{filename}", getUIResource, PATH(String, filename)) {
+  ENDPOINT("GET", SWAGGER_ROOT_PATH "/{filename}", getUIResource, PATH(String, filename)) {
     if(m_resources->isStreaming()) {
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
         m_resources->getResourceStream(filename->c_str())
