@@ -35,13 +35,6 @@
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
 
-#ifndef SWAGGER_ROOT_PATH
-#define SWAGGER_ROOT_PATH "/swagger"
-#endif
-#ifndef SWAGGER_UI_PATH
-#define SWAGGER_UI_PATH "/ui"
-#endif
-
 namespace oatpp { namespace swagger {
 
 /**

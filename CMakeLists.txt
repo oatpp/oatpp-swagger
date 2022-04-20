@@ -98,6 +98,13 @@ message("\n#####################################################################
 ###################################################################################################
 ## define targets
 
+set(SWAGGER_ROOT_PATH "/swagger" CACHE STRING "Default root path to the Swagger")
+set(SWAGGER_UI_PATH "/ui" CACHE STRING "Default path suffix to the Swagger UI")
+add_compile_definitions(
+    SWAGGER_ROOT_PATH="${SWAGGER_ROOT_PATH}"
+    SWAGGER_UI_PATH="${SWAGGER_UI_PATH}"
+)
+
 include(cmake/module-utils.cmake)
 
 include(cmake/msvc-runtime.cmake)
