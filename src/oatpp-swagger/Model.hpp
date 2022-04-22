@@ -382,7 +382,7 @@ public:
      */
     static std::shared_ptr<SecurityScheme> DefaultBearerAuthorizationSecurityScheme(const oatpp::String& bearerFormat = nullptr) {
       auto ss = SecurityScheme::createShared();
-      ss->description = "Default HTTP Basic Authorization";
+      ss->description = "Default Bearer/Token Authorization";
       ss->scheme = "bearer";
       ss->type = "http";
       ss->name = nullptr;
