@@ -91,4 +91,42 @@ auto swaggerController = oatpp::swagger::Controller::createShared(<list-of-endpo
 swaggerController->addEndpointsToRouter(router);
 ```
 
+3) cmake :  
+
+Add the following lines to your CMakeLists.txt project file
+```
+
+find_package(oatpp 1.3.0 REQUIRED)
+if(oatpp_FOUND)
+  message(STATUS "Found oatpp version: ${oatpp_VERSION_STRING}")
+else()
+  message(FATAL_ERROR "Could not find oatpp")
+endif()
+
+find_package(oatpp-swagger  1.3.0 REQUIRED)
+if(oatpp-swagger_FOUND)
+  message(STATUS "Found oatpp-swagger version: ${oatpp-swagger_VERSION_STRING}")
+else()
+  message(FATAL_ERROR "Could not find oatpp-swagger")
+endif()
+
+include_directories(${oatpp_INCLUDE_DIRS})
+include_directories(${oatpp-swagger_INCLUDE_DIRS})
+
+set(SWAGGER_ROOT_PATH "/swagger" CACHE STRING "Default root path to the Swagger")
+set(SWAGGER_UI_PATH "/ui" CACHE STRING "Default path suffix to the Swagger UI")
+
+add_compile_definitions(
+    SWAGGER_ROOT_PATH="${SWAGGER_ROOT_PATH}"
+    SWAGGER_UI_PATH="${SWAGGER_UI_PATH}"
+    -DOATPP_SWAGGER_RES_PATH="${OATPP_BASE_DIR}/bin/oatpp-swagger/res"
+)
+
+target_link_libraries (project PUBLIC
+ 
+   PUBLIC oatpp::oatpp
+   PUBLIC oatpp::oatpp-swagger
+)
+```
+
 **Done!**
