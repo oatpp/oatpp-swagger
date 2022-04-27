@@ -108,7 +108,7 @@ public:
     
   };
   
-  ENDPOINT_ASYNC("GET", "/swagger/ui", GetUIRoot) {
+  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH SWAGGER_UI_PATH, GetUIRoot) {
     
     ENDPOINT_ASYNC_INIT(GetUIRoot)
     
@@ -118,7 +118,7 @@ public:
     
   };
   
-  ENDPOINT_ASYNC("GET", "/swagger/{filename}", GetUIResource) {
+  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH "/{filename}", GetUIResource) {
     
     ENDPOINT_ASYNC_INIT(GetUIResource)
     
