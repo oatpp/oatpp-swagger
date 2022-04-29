@@ -119,11 +119,14 @@ set(SWAGGER_UI_PATH "/ui" CACHE STRING "Default path suffix to the Swagger UI")
 add_compile_definitions(
     SWAGGER_ROOT_PATH="${SWAGGER_ROOT_PATH}"
     SWAGGER_UI_PATH="${SWAGGER_UI_PATH}"
-    -DOATPP_SWAGGER_RES_PATH="${OATPP_BASE_DIR}/bin/oatpp-swagger/res"
+)
+
+add_definitions( 
+  -DOATPP_SWAGGER_RES_PATH="${OATPP_BASE_DIR}/bin/oatpp-swagger/res"
 )
 
 target_link_libraries (project PUBLIC
- 
+   // add_your libraries here
    PUBLIC oatpp::oatpp
    PUBLIC oatpp::oatpp-swagger
 )
