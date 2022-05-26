@@ -28,6 +28,11 @@ target_include_directories(${OATPP_THIS_MODULE_NAME}
         PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
+target_compile_definitions(${OATPP_THIS_MODULE_NAME}
+        PUBLIC SWAGGER_ROOT_PATH="${SWAGGER_ROOT_PATH}"
+        SWAGGER_UI_PATH="${SWAGGER_UI_PATH}"
+)
+
 ## TODO link dependencies here (if some)
 
 #######################################################################################################
