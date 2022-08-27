@@ -25,9 +25,11 @@
 #ifndef oatpp_swagger_AsyncController_hpp
 #define oatpp_swagger_AsyncController_hpp
 
+#include "oatpp-swagger/ControllerPaths.hpp"
 #include "oatpp-swagger/Resources.hpp"
 #include "oatpp-swagger/Generator.hpp"
 
+#include "oatpp/web/protocol/http/outgoing/StreamingBody.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
 
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
@@ -51,16 +53,20 @@ namespace oatpp { namespace swagger {
 class AsyncController : public oatpp::web::server::api::ApiController {
 public:
   typedef AsyncController __ControllerType;
-public:
+private:
   oatpp::Object<oas3::Document> m_document;
   std::shared_ptr<oatpp::swagger::Resources> m_resources;
+private:
+  ControllerPaths m_paths;
 public:
   AsyncController(const std::shared_ptr<ObjectMapper>& objectMapper,
              const oatpp::Object<oas3::Document>& document,
-             const std::shared_ptr<oatpp::swagger::Resources>& resources)
+             const std::shared_ptr<oatpp::swagger::Resources>& resources,
+             const ControllerPaths& paths)
     : oatpp::web::server::api::ApiController(objectMapper)
     , m_document(document)
     , m_resources(resources)
+    , m_paths(paths)
   {}
 public:
 
@@ -92,13 +98,21 @@ public:
 
     Generator generator(generatorConfig);
     auto document = generator.generateDocument(documentInfo, endpointsList);
+
+    ControllerPaths paths;
+    try {
+      auto ps = OATPP_GET_COMPONENT(std::shared_ptr<ControllerPaths>);
+      if(ps) paths = *ps;
+    } catch (std::runtime_error&) {
+      // DO nothing.
+    }
     
-    return std::make_shared<AsyncController>(objectMapper, document, resources);
+    return std::make_shared<AsyncController>(objectMapper, document, resources, paths);
   }
   
 #include OATPP_CODEGEN_BEGIN(ApiController)
   
-  ENDPOINT_ASYNC("GET", "/api-docs/oas-3.0.0.json", Api) {
+  ENDPOINT_ASYNC("GET", m_paths.apiJson, Api) {
     
     ENDPOINT_ASYNC_INIT(Api)
     
@@ -108,23 +122,40 @@ public:
     
   };
   
-  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH SWAGGER_UI_PATH, GetUIRoot) {
+  ENDPOINT_ASYNC("GET", m_paths.ui, GetUIRoot) {
     
     ENDPOINT_ASYNC_INIT(GetUIRoot)
     
     Action act() override {
-      return _return(controller->createResponse(Status::CODE_200, controller->m_resources->getResource("index.html")));
+      std::string ui;
+      if(controller->m_resources->isStreaming()) {
+        v_char8 buffer[1024];
+        auto fileStream = controller->m_resources->getResourceStream("index.html");
+        oatpp::data::stream::BufferOutputStream s(1024);
+        oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
+        ui = s.toString();
+      } else {
+        ui = * controller->m_resources->getResource("index.html"); // * - copy of the index.html
+      }
+      ui.replace(ui.find("%%API.JSON%%"), 12, controller->m_paths.apiJson);
+      return _return(controller->createResponse(Status::CODE_200, ui));
     }
     
   };
   
-  ENDPOINT_ASYNC("GET", SWAGGER_ROOT_PATH "/{filename}", GetUIResource) {
+  ENDPOINT_ASYNC("GET", m_paths.uiResources, GetUIResource) {
     
     ENDPOINT_ASYNC_INIT(GetUIResource)
     
     Action act() override {
       auto filename = request->getPathVariable("filename");
       OATPP_ASSERT_HTTP(filename, Status::CODE_400, "filename should not be null")
+      if(controller->m_resources->isStreaming()) {
+        auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
+          controller->m_resources->getResourceStream(filename->c_str())
+        );
+        return _return(OutgoingResponse::createShared(Status::CODE_200, body));
+      }
       return _return(controller->createResponse(Status::CODE_200, controller->m_resources->getResource(filename->c_str())));
     }
     

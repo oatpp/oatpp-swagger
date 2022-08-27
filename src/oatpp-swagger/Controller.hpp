@@ -25,6 +25,7 @@
 #ifndef oatpp_swagger_Controller_hpp
 #define oatpp_swagger_Controller_hpp
 
+#include "oatpp-swagger/ControllerPaths.hpp"
 #include "oatpp-swagger/Resources.hpp"
 #include "oatpp-swagger/Generator.hpp"
 
@@ -53,13 +54,17 @@ class Controller : public oatpp::web::server::api::ApiController {
 private:
   oatpp::Object<oas3::Document> m_document;
   std::shared_ptr<oatpp::swagger::Resources> m_resources;
+private:
+  ControllerPaths m_paths;
 public:
   Controller(const std::shared_ptr<ObjectMapper>& objectMapper,
              const oatpp::Object<oas3::Document>& document,
-             const std::shared_ptr<oatpp::swagger::Resources>& resources)
+             const std::shared_ptr<oatpp::swagger::Resources>& resources,
+             const ControllerPaths& paths)
     : oatpp::web::server::api::ApiController(objectMapper)
     , m_document(document)
     , m_resources(resources)
+    , m_paths(paths)
   {}
 public:
 
@@ -85,33 +90,46 @@ public:
     std::shared_ptr<Generator::Config> generatorConfig;
     try {
       generatorConfig = OATPP_GET_COMPONENT(std::shared_ptr<Generator::Config>);
-    } catch (std::runtime_error e) {
+    } catch (std::runtime_error&) {
       generatorConfig = std::make_shared<Generator::Config>();
     }
 
     Generator generator(generatorConfig);
     auto document = generator.generateDocument(documentInfo, endpointsList);
-    
-    return std::make_shared<Controller>(objectMapper, document, resources);
+
+    ControllerPaths paths;
+    try {
+      auto ps = OATPP_GET_COMPONENT(std::shared_ptr<ControllerPaths>);
+      if(ps) paths = *ps;
+    } catch (std::runtime_error&) {
+      // DO nothing.
+    }
+
+    return std::make_shared<Controller>(objectMapper, document, resources, paths);
   }
   
 #include OATPP_CODEGEN_BEGIN(ApiController)
   
-  ENDPOINT("GET", "/api-docs/oas-3.0.0.json", api) {
+  ENDPOINT("GET", m_paths.apiJson, api) {
     return createDtoResponse(Status::CODE_200, m_document);
   }
   
-  ENDPOINT("GET", SWAGGER_ROOT_PATH SWAGGER_UI_PATH, getUIRoot) {
+  ENDPOINT("GET", m_paths.ui, getUIRoot) {
+    std::string ui;
     if(m_resources->isStreaming()) {
-      auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
-        m_resources->getResourceStream("index.html")
-      );
-      return OutgoingResponse::createShared(Status::CODE_200, body);
+      v_char8 buffer[1024];
+      auto fileStream = m_resources->getResourceStream("index.html");
+      oatpp::data::stream::BufferOutputStream s(1024);
+      oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
+      ui = s.toString();
+    } else {
+      ui = *m_resources->getResource("index.html"); // * - copy of the index.html
     }
-    return createResponse(Status::CODE_200, m_resources->getResource("index.html"));
+    ui.replace(ui.find("%%API.JSON%%"), 12, m_paths.apiJson);
+    return createResponse(Status::CODE_200, ui);
   }
   
-  ENDPOINT("GET", SWAGGER_ROOT_PATH "/{filename}", getUIResource, PATH(String, filename)) {
+  ENDPOINT("GET", m_paths.uiResources, getUIResource, PATH(String, filename)) {
     if(m_resources->isStreaming()) {
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
         m_resources->getResourceStream(filename->c_str())

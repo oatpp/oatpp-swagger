@@ -113,14 +113,6 @@ endif()
 include_directories(${oatpp_INCLUDE_DIRS})
 include_directories(${oatpp-swagger_INCLUDE_DIRS})
 
-set(SWAGGER_ROOT_PATH "/swagger" CACHE STRING "Default root path to the Swagger")
-set(SWAGGER_UI_PATH "/ui" CACHE STRING "Default path suffix to the Swagger UI")
-
-add_compile_definitions(
-    SWAGGER_ROOT_PATH="${SWAGGER_ROOT_PATH}"
-    SWAGGER_UI_PATH="${SWAGGER_UI_PATH}"
-)
-
 add_definitions( 
   -DOATPP_SWAGGER_RES_PATH="${OATPP_BASE_DIR}/bin/oatpp-swagger/res"
 )
@@ -131,5 +123,24 @@ target_link_libraries (project PUBLIC
    PUBLIC oatpp::oatpp-swagger
 )
 ```
+
+### Customise Swagger UI Paths
+
+To customise swagger UI endpoints paths add the following component:
+
+```c++
+  /**
+   *  Swagger Controller Paths
+   */
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::ControllerPaths>, controllerPaths)([] {
+    auto paths = std::make_shared<oatpp::swagger::ControllerPaths>();
+    paths->apiJson = "custom/path/for/api.json";       // default is "api-docs/oas-3.0.0.json"
+    paths->ui = "my/custom/path/swagger-ui";           // default is "swagger/ui"
+    paths->uiResources = "my/custom/path/{filename}";  // default is "swagger/{filename}"
+    return paths;
+  }());
+```
+
+**NOTE:** `paths->ui` and `paths->uiResources` MUST have the same base path - as shown above.
 
 **Done!**
