@@ -2,6 +2,7 @@
 add_library(${OATPP_THIS_MODULE_NAME}
         oatpp-swagger/AsyncController.hpp
         oatpp-swagger/Controller.hpp
+        oatpp-swagger/ControllerPaths.hpp
         oatpp-swagger/Generator.cpp
         oatpp-swagger/Generator.hpp
         oatpp-swagger/Model.hpp
@@ -9,8 +10,7 @@ add_library(${OATPP_THIS_MODULE_NAME}
         oatpp-swagger/Resources.hpp
         oatpp-swagger/Types.cpp
         oatpp-swagger/Types.hpp
-        oatpp-swagger/oas3/Model.hpp
-)
+        oatpp-swagger/oas3/Model.hpp)
 
 set_target_properties(${OATPP_THIS_MODULE_NAME} PROPERTIES
         CXX_STANDARD 11
