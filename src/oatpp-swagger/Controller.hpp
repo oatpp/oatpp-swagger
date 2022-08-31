@@ -134,9 +134,13 @@ public:
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
         m_resources->getResourceStream(filename->c_str())
       );
-      return OutgoingResponse::createShared(Status::CODE_200, body);
+      auto resp = OutgoingResponse::createShared(Status::CODE_200, body);
+      resp->putHeader("Content-Type", m_resources->getMimeType(filename));
+      return resp;
     }
-    return createResponse(Status::CODE_200, m_resources->getResource(filename->c_str()));
+    auto resp = createResponse(Status::CODE_200, m_resources->getResource(filename->c_str()));
+    resp->putHeader("Content-Type", m_resources->getMimeType(filename));
+    return resp;
   }
   
 #include OATPP_CODEGEN_END(ApiController)

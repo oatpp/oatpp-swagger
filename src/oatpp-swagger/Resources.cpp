@@ -104,4 +104,26 @@ v_io_size Resources::ReadCallback::read(void *buffer, v_buff_size count, async::
   return m_stream.read(buffer, count, action);
 }
 
+bool Resources::hasEnding(std::string fullString, std::string const &ending) const {
+    std::transform(fullString.begin(), fullString.end(), fullString.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (fullString.length() >= ending.length()) {
+        return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+    } else {
+        return false;
+    }
+}
+
+std::string Resources::getMimeType(const std::string &filename) const {
+    if (hasEnding(filename, ".html")) return "text/html";
+    if (hasEnding(filename, ".jpg")) return "image/jpeg";
+    if (hasEnding(filename, ".jpeg")) return "image/jpeg";
+    if (hasEnding(filename, ".png")) return "image/png";
+    if (hasEnding(filename, ".gif")) return "image/gif";
+    if (hasEnding(filename, ".css")) return "text/css";
+    if (hasEnding(filename, ".js")) return "text/javascript";
+    if (hasEnding(filename, ".xml")) return "text/xml";
+    return "text/plain";
+}
+
 }}
