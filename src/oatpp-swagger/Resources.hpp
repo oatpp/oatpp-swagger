@@ -45,6 +45,7 @@ private:
 private:
   oatpp::String loadFromFile(const char* fileName);
   void cacheResource(const char* fileName);
+  bool hasEnding(std::string fullString, std::string const &ending) const;
 
   class ReadCallback : public oatpp::data::stream::ReadCallback {
    private:
@@ -126,6 +127,13 @@ public:
   bool isStreaming() {
     return m_streaming;
   }
+
+  /**
+   * Returns the MIME type for a given filename
+   * @param filename to return the MIME type
+   * @return a MIME type
+   */
+  std::string getMimeType(const std::string &filename) const;
 };
   
 }}
