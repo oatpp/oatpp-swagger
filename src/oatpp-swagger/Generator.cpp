@@ -421,7 +421,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
         for (const auto &header : info->headers.getOrder()) {
           // We don't want the Authorization header listed as Parameter. This should be done in ENDPOINT_INFO() { info->addSecurityRequirement( /* SecurityScheme-Name */ ); }
           if (header != oatpp::web::protocol::http::Header::AUTHORIZATION) {
-            filteredHeaders[header] = info->headers[header];
+            filteredHeaders.add(header, info->headers[header].type) = info->headers[header];
           }
         }
       }
