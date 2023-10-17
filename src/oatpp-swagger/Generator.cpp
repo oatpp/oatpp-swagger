@@ -383,6 +383,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
     operation->operationId = info->name;
     operation->summary = info->summary;
     operation->description = info->description;
+    operation->deprecated = info->deprecated;
 
     if(info->tags.size() > 0) {
       operation->tags = oatpp::List<String>({});
