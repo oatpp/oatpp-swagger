@@ -639,6 +639,11 @@ class PathItemOperation : public oatpp::DTO {
   DTO_FIELD(String, operationId);
 
   /**
+   * Is operation deprecated.
+   */
+  DTO_FIELD(Boolean, deprecated);
+
+  /**
    * Request Body.
    */
   DTO_FIELD(Object<RequestBody>, requestBody);
