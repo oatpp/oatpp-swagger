@@ -30,7 +30,7 @@
 #ifndef oatpp_swagger_Config_hpp
 #define oatpp_swagger_Config_hpp
 
-#include "oatpp/core/Types.hpp"
+#include "oatpp/Types.hpp"
 
 namespace oatpp { namespace swagger {
 

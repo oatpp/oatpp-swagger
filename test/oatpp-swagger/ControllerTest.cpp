@@ -7,8 +7,8 @@
 #include "test-controllers/TestController.hpp"
 
 #include "oatpp-swagger/Controller.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
-#include "oatpp/core/data/stream/BufferStream.hpp"
+#include "oatpp/json/ObjectMapper.hpp"
+#include "oatpp/data/stream/BufferStream.hpp"
 
 #include <iostream>
 
@@ -68,7 +68,7 @@ void ControllerTest::onRun() {
   oatpp::data::stream::BufferOutputStream responseBuffer;
 
   // Create ObjectMapper
-  auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+  auto objectMapper = std::make_shared<oatpp::json::ObjectMapper>();
 
   // Register swagger components
   SwaggerComponent swaggerComponent;
@@ -94,13 +94,13 @@ void ControllerTest::onRun() {
 
     auto responseText = stream.toString();
 
-    oatpp::parser::Caret caret(responseText);
+    utils::parser::Caret caret(responseText);
     caret.findChar('{');
 
     auto document = objectMapper->readFromCaret<oatpp::Object<oatpp::swagger::oas3::Document>>(caret);
 
     if (caret.hasError()) {
-      OATPP_LOGD(TAG, "error='%s', pos=%d", caret.getErrorMessage(), caret.getPosition());
+      OATPP_LOGd(TAG, "error='{}', pos={}", caret.getErrorMessage(), caret.getPosition());
     }
     OATPP_ASSERT(caret.hasError() == false);
 
@@ -115,12 +115,12 @@ void ControllerTest::onRun() {
     response->send(&stream, &responseBuffer, nullptr);
 
     auto responseText = stream.toString();
-    OATPP_LOGD(TAG, responseText->c_str());
+    OATPP_LOGd(TAG, responseText);
 
   }
 
   // TODO test generated document here
-  OATPP_LOGV(TAG, "TODO implement test");
+  OATPP_LOGv(TAG, "TODO implement test");
 
 }
 

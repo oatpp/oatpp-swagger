@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 ###################################################################################################
 ## These variables are passed to oatpp-module-install.cmake script
 ## use these variables to configure module installation
 
 set(OATPP_THIS_MODULE_NAME oatpp-swagger) ## name of the module (also name of folders in installation dirs)
-set(OATPP_THIS_MODULE_VERSION "1.3.0") ## version of the module (also sufix of folders in installation dirs)
+set(OATPP_THIS_MODULE_VERSION "1.4.0") ## version of the module (also sufix of folders in installation dirs)
 set(OATPP_THIS_MODULE_LIBRARIES oatpp-swagger) ## list of libraries to find when find_package is called
 set(OATPP_THIS_MODULE_TARGETS oatpp-swagger) ## list of targets to install
 set(OATPP_THIS_MODULE_DIRECTORIES oatpp-swagger) ## list of directories to install

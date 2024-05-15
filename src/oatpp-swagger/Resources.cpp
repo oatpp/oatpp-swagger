@@ -23,6 +23,9 @@
  ***************************************************************************/
 
 #include "Resources.hpp"
+
+#include "oatpp/base/Log.hpp"
+
 #include <stdio.h>
 #include <fstream>
 
@@ -63,7 +66,7 @@ oatpp::String Resources::loadFromFile(const char* fileName) {
     
   }
   
-  OATPP_LOGE("oatpp::swagger::Resources::loadFromFile()", "Can't load file '%s'", fullFilename->c_str());
+  OATPP_LOGe("oatpp::swagger::Resources::loadFromFile()", "Can't load file '{}'", fullFilename);
   throw std::runtime_error("[oatpp::swagger::Resources::loadFromFile(...)]: Can't load file. Please make sure you specified full path to oatpp-swagger/res folder");
   
 }

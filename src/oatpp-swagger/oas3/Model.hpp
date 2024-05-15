@@ -31,8 +31,8 @@
 
 #include "oatpp-swagger/Model.hpp"
 
-#include "oatpp/core/data/mapping/type/Object.hpp"
-#include "oatpp/core/macro/codegen.hpp"
+#include "oatpp/data/type/Object.hpp"
+#include "oatpp/macro/codegen.hpp"
 
 namespace oatpp { namespace swagger { namespace oas3 {
 #include OATPP_CODEGEN_BEGIN(DTO)

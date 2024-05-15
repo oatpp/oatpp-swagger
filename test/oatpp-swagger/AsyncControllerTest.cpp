@@ -7,7 +7,7 @@
 #include "test-controllers/TestAsyncController.hpp"
 
 #include "oatpp-swagger/AsyncController.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "oatpp/json/ObjectMapper.hpp"
 
 #include <iostream>
 
@@ -57,7 +57,7 @@ namespace {
 void AsyncControllerTest::onRun() {
 
   // Create ObjectMapper
-  auto objectMapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+  auto objectMapper = std::make_shared<oatpp::json::ObjectMapper>();
 
   // Register swagger components
   SwaggerComponent swaggerComponent;
@@ -71,7 +71,7 @@ void AsyncControllerTest::onRun() {
   auto swaggerController = oatpp::swagger::AsyncController::createShared(docEndpoints);
 
   // TODO test generated document here
-  OATPP_LOGV(TAG, "TODO implement test");
+  OATPP_LOGv(TAG, "TODO implement test");
 
 }
 

@@ -6,12 +6,12 @@
 #define OATPP_SWAGGER_TESTCONTROLLER_HPP
 
 #include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "oatpp/json/ObjectMapper.hpp"
 
-#include "oatpp/core/data/mapping/type/Object.hpp"
+#include "oatpp/data/type/Object.hpp"
 
-#include "oatpp/core/macro/codegen.hpp"
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/macro/codegen.hpp"
+#include "oatpp/macro/component.hpp"
 
 // DTO //-----------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ namespace __class {
   class PointClass;
 }
 
-typedef oatpp::data::mapping::type::Primitive<VPoint, __class::PointClass> Point;
+typedef oatpp::data::type::Primitive<VPoint, __class::PointClass> Point;
 
 namespace __class {
 

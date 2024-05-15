@@ -25,9 +25,9 @@
 #ifndef oatpp_swagger_Resources_hpp
 #define oatpp_swagger_Resources_hpp
 
-#include "oatpp/core/Types.hpp"
-#include "oatpp/core/data/stream/BufferStream.hpp"
-#include "oatpp/core/data/stream/FileStream.hpp"
+#include "oatpp/Types.hpp"
+#include "oatpp/data/stream/BufferStream.hpp"
+#include "oatpp/data/stream/FileStream.hpp"
 
 #include <unordered_map>
 

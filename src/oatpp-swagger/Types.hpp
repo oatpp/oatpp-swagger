@@ -25,8 +25,7 @@
 #ifndef oatpp_swagger_Types_hpp
 #define oatpp_swagger_Types_hpp
 
-#include "oatpp/core/data/mapping/type/Type.hpp"
-#include "oatpp/core/Types.hpp"
+#include "oatpp/Types.hpp"
 
 namespace oatpp { namespace swagger {
   
@@ -49,7 +48,7 @@ namespace __class {
     /**
      * CLASS_NAME = `"string"`.
      */
-    static const oatpp::data::mapping::type::ClassId CLASS_ID;
+    static const oatpp::data::type::ClassId CLASS_ID;
 
     /**
      * Get type information.
@@ -69,7 +68,7 @@ namespace __class {
  * Usage example: `info->addConsumes<oatpp::swagger::Binary>("application/octet-stream");`.<br>
  * For more info see: [Endpoint Annotation And API Documentation](/docs/components/api-controller/#endpoint-annotation-and-api-documentation).
  */
-typedef oatpp::data::mapping::type::ObjectWrapper<std::string, __class::Binary> Binary;
+typedef oatpp::data::type::ObjectWrapper<std::string, __class::Binary> Binary;
   
 }}
 
