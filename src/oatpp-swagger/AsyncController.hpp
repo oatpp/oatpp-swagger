@@ -134,10 +134,30 @@ public:
       } else {
         ui = * controller->m_resources->getResource("index.html"); // * - copy of the index.html
       }
-      ui.replace(ui.find("%%API.JSON%%"), 12, controller->m_paths.apiJson);
       return _return(controller->createResponse(Status::CODE_200, ui));
     }
     
+  };
+
+  ENDPOINT_ASYNC("GET", m_paths.initializer, GetInitializer) {
+
+  ENDPOINT_ASYNC_INIT(GetInitializer)
+
+    Action act() override {
+      std::string ui;
+      if(controller->m_resources->isStreaming()) {
+        v_char8 buffer[1024];
+        auto fileStream = controller->m_resources->getResourceStream("swagger-initializer.js");
+        oatpp::data::stream::BufferOutputStream s(1024);
+        oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
+        ui = s.toString();
+      } else {
+        ui = * controller->m_resources->getResource("swagger-initializer.js"); // * - copy of the index.html
+      }
+      ui.replace(ui.find("%%API.JSON%%"), 12, controller->m_paths.apiJson);
+      return _return(controller->createResponse(Status::CODE_200, ui));
+    }
+
   };
   
   ENDPOINT_ASYNC("GET", m_paths.uiResources, GetUIResource) {

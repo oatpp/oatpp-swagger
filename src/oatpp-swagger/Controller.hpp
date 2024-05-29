@@ -122,6 +122,20 @@ public:
     } else {
       ui = *m_resources->getResource("index.html"); // * - copy of the index.html
     }
+    return createResponse(Status::CODE_200, ui);
+  }
+
+  ENDPOINT("GET", m_paths.initializer, getInitializer) {
+    std::string ui;
+    if(m_resources->isStreaming()) {
+      v_char8 buffer[1024];
+      auto fileStream = m_resources->getResourceStream("swagger-initializer.js");
+      oatpp::data::stream::BufferOutputStream s(1024);
+      oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
+      ui = s.toString();
+    } else {
+      ui = *m_resources->getResource("swagger-initializer.js"); // * - copy of the index.html
+    }
     ui.replace(ui.find("%%API.JSON%%"), 12, m_paths.apiJson);
     return createResponse(Status::CODE_200, ui);
   }

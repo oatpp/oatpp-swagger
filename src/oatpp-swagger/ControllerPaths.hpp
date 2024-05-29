@@ -45,6 +45,11 @@ struct ControllerPaths {
   oatpp::String ui = "swagger/ui";
 
   /**
+   * Path to swagger UI (swagger-initializer.js).
+   */
+  oatpp::String initializer = "swagger/swagger-initializer.js";
+
+  /**
    * Path to other ui resources. MUST contain `/{filename}` at the end.
    */
   oatpp::String uiResources = "swagger/{filename}";

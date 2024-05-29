@@ -77,8 +77,10 @@ public:
 
     res->cacheResource("favicon-16x16.png");
     res->cacheResource("favicon-32x32.png");
+    res->cacheResource("index.css");
     res->cacheResource("index.html");
     res->cacheResource("oauth2-redirect.html");
+    res->cacheResource("swagger-initializer.js");
     res->cacheResource("swagger-ui-bundle.js");
     res->cacheResource("swagger-ui-bundle.js.map");
     res->cacheResource("swagger-ui-es-bundle-core.js");
