@@ -28,9 +28,9 @@
 #include "oatpp/Types.hpp"
 #include "oatpp/data/stream/BufferStream.hpp"
 #include "oatpp/data/stream/FileStream.hpp"
+#include "oatpp/data/resource/Resource.hpp"
 
 #include <unordered_map>
-
 
 namespace oatpp { namespace swagger {
 
@@ -40,95 +40,50 @@ namespace oatpp { namespace swagger {
 class Resources {
 private:
   oatpp::String m_resDir;
-  std::unordered_map<oatpp::String, oatpp::String> m_resources;
   bool m_streaming;
+  std::unordered_map<oatpp::String, std::shared_ptr<data::resource::Resource>> m_resources;
 private:
-  oatpp::String loadFromFile(const char* fileName);
-  void cacheResource(const char* fileName);
+  void addResource(const oatpp::String& fileName);
   bool hasEnding(std::string fullString, std::string const &ending) const;
-
-  class ReadCallback : public oatpp::data::stream::ReadCallback {
-   private:
-    oatpp::String m_file;
-    oatpp::data::stream::FileInputStream m_stream;
-
-   public:
-
-    ReadCallback(const oatpp::String& file);
-    v_io_size read(void *buffer, v_buff_size count, async::Action& action) override;
-
-  };
-
 public:
   /**
    * Constructor.
    * @param resDir - directory containing swagger-ui resources.
+   * @param streaming - whether to stream resources from file or to cache in-memory
    */
   Resources(const oatpp::String& resDir, bool streaming = false);
-public:
 
   /**
-   * Load and cache Swagger-UI resources.
-   * @param resDir - directory containing swagger-ui resources.
-   * @return - `std::shared_ptr` to Resources.
-   */
-  static std::shared_ptr<Resources> loadResources(const oatpp::String& resDir) {
-    auto res = std::make_shared<Resources>(resDir);
-
-    res->cacheResource("favicon-16x16.png");
-    res->cacheResource("favicon-32x32.png");
-    res->cacheResource("index.css");
-    res->cacheResource("index.html");
-    res->cacheResource("oauth2-redirect.html");
-    res->cacheResource("swagger-initializer.js");
-    res->cacheResource("swagger-ui-bundle.js");
-    res->cacheResource("swagger-ui-bundle.js.map");
-    res->cacheResource("swagger-ui-es-bundle-core.js");
-    res->cacheResource("swagger-ui-es-bundle-core.js.map");
-    res->cacheResource("swagger-ui-es-bundle.js");
-    res->cacheResource("swagger-ui-es-bundle.js.map");
-    res->cacheResource("swagger-ui-standalone-preset.js");
-    res->cacheResource("swagger-ui-standalone-preset.js.map");
-    res->cacheResource("swagger-ui.css");
-    res->cacheResource("swagger-ui.css.map");
-    res->cacheResource("swagger-ui.js");
-    res->cacheResource("swagger-ui.js.map");
-    
-    return res;
-  }
-
-  /**
-   * Stream Swagger-UI resources directly from disk.
-   * @param resDir - directory containing swagger-ui resources.
-   * @return - `std::shared_ptr` to Resources.
-   */
-  static std::shared_ptr<Resources> streamResources(const oatpp::String& resDir) {
-    auto res = std::make_shared<Resources>(resDir, true);
-
-    return res;
-  }
-
-  /**
-   * Get cached resource by filename.
-   * @param filename - name of the resource file.
-   * @return - &id:oatpp::String; containing resource binary data.
-   */
-  oatpp::String getResource(const oatpp::String& filename);
-
-  /**
-   * Get streamed resource by filename.
-   * @param filename - name of the resource file.
-   * @return - `std::shared_ptr` to &id:oatpp::data::stream::ReadCallback; containing resource binary data stream."
-   */
-  std::shared_ptr<ReadCallback> getResourceStream(const oatpp::String& filename);
-
-  /**
-   * Returns true if this is a streaming ressource instance.
+   * Legacy function.
+   * Use std::make_shared<Resources>(resDir) directly
+   * @param resDir
+   * @param streaming
    * @return
    */
-  bool isStreaming() {
-    return m_streaming;
+  static std::shared_ptr<Resources> loadResources(const oatpp::String& resDir, bool streaming = false) {
+    return std::make_shared<Resources>(resDir, false);
   }
+
+  /**
+   * Override swagger resource.
+   * @param filename
+   * @param resource
+   */
+  void overrideResource(const oatpp::String& filename, const std::shared_ptr<data::resource::Resource>& resource);
+
+  /**
+   * Get resource by filename.
+   * @param filename - name of the resource file.
+   * @return - &id:oatpp::data::resource::Resource;
+   */
+  std::shared_ptr<data::resource::Resource> getResource(const oatpp::String& filename) const;
+
+  /**
+   * Get resource data.
+   * @param filename
+   * @return
+   */
+  oatpp::String getResourceData(const oatpp::String& filename) const;
 
   /**
    * Returns the MIME type for a given filename
@@ -136,6 +91,13 @@ public:
    * @return a MIME type
    */
   std::string getMimeType(const std::string &filename) const;
+
+  /**
+   * Returns true if this is a streaming ressource instance.
+   * @return
+   */
+  bool isStreaming() const;
+
 };
   
 }}

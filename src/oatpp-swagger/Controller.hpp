@@ -112,44 +112,20 @@ public:
   }
   
   ENDPOINT("GET", m_paths.ui, getUIRoot) {
-    std::string ui;
-    if(m_resources->isStreaming()) {
-      v_char8 buffer[1024];
-      auto fileStream = m_resources->getResourceStream("index.html");
-      oatpp::data::stream::BufferOutputStream s(1024);
-      oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
-      ui = s.toString();
-    } else {
-      ui = *m_resources->getResource("index.html"); // * - copy of the index.html
-    }
-    return createResponse(Status::CODE_200, ui);
+    return createResponse(Status::CODE_200, m_resources->getResourceData("index.html"));
   }
 
   ENDPOINT("GET", m_paths.initializer, getInitializer) {
-    std::string ui;
-    if(m_resources->isStreaming()) {
-      v_char8 buffer[1024];
-      auto fileStream = m_resources->getResourceStream("swagger-initializer.js");
-      oatpp::data::stream::BufferOutputStream s(1024);
-      oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
-      ui = s.toString();
-    } else {
-      ui = *m_resources->getResource("swagger-initializer.js"); // * - copy of the index.html
-    }
+    std::string ui = m_resources->getResourceData("swagger-initializer.js");
     ui.replace(ui.find("%%API.JSON%%"), 12, m_paths.apiJson);
     return createResponse(Status::CODE_200, ui);
   }
   
   ENDPOINT("GET", m_paths.uiResources, getUIResource, PATH(String, filename)) {
-    if(m_resources->isStreaming()) {
-      auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
-        m_resources->getResourceStream(filename->c_str())
-      );
-      auto resp = OutgoingResponse::createShared(Status::CODE_200, body);
-      resp->putHeader("Content-Type", m_resources->getMimeType(filename));
-      return resp;
-    }
-    auto resp = createResponse(Status::CODE_200, m_resources->getResource(filename->c_str()));
+    auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
+      m_resources->getResource(filename)->openInputStream()
+    );
+    auto resp = OutgoingResponse::createShared(Status::CODE_200, body);
     resp->putHeader("Content-Type", m_resources->getMimeType(filename));
     return resp;
   }

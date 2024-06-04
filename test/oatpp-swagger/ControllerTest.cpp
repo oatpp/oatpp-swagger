@@ -50,7 +50,7 @@ namespace {
      */
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::Resources>, swaggerResources)([] {
       // Make sure to specify correct full path to oatpp-swagger/res folder !!!
-      return oatpp::swagger::Resources::streamResources(OATPP_SWAGGER_RES_PATH);
+      return oatpp::swagger::Resources::loadResources(OATPP_SWAGGER_RES_PATH, true);
     }());
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::swagger::Generator::Config>, generatorConfig)([] {

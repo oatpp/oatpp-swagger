@@ -124,16 +124,7 @@ public:
     ENDPOINT_ASYNC_INIT(GetUIRoot)
     
     Action act() override {
-      std::string ui;
-      if(controller->m_resources->isStreaming()) {
-        v_char8 buffer[1024];
-        auto fileStream = controller->m_resources->getResourceStream("index.html");
-        oatpp::data::stream::BufferOutputStream s(1024);
-        oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
-        ui = s.toString();
-      } else {
-        ui = * controller->m_resources->getResource("index.html"); // * - copy of the index.html
-      }
+      auto ui = controller->m_resources->getResourceData("index.html");
       return _return(controller->createResponse(Status::CODE_200, ui));
     }
     
@@ -144,16 +135,7 @@ public:
   ENDPOINT_ASYNC_INIT(GetInitializer)
 
     Action act() override {
-      std::string ui;
-      if(controller->m_resources->isStreaming()) {
-        v_char8 buffer[1024];
-        auto fileStream = controller->m_resources->getResourceStream("swagger-initializer.js");
-        oatpp::data::stream::BufferOutputStream s(1024);
-        oatpp::data::stream::transfer(fileStream, &s, 0, buffer, 1024);
-        ui = s.toString();
-      } else {
-        ui = * controller->m_resources->getResource("swagger-initializer.js"); // * - copy of the index.html
-      }
+      std::string ui = controller->m_resources->getResourceData("swagger-initializer.js");
       ui.replace(ui.find("%%API.JSON%%"), 12, controller->m_paths.apiJson);
       return _return(controller->createResponse(Status::CODE_200, ui));
     }
@@ -167,18 +149,14 @@ public:
     Action act() override {
       auto filename = request->getPathVariable("filename");
       OATPP_ASSERT_HTTP(filename, Status::CODE_400, "filename should not be null")
-      if(controller->m_resources->isStreaming()) {
-        auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
-          controller->m_resources->getResourceStream(filename->c_str())
-        );
-        auto resp = OutgoingResponse::createShared(Status::CODE_200, body);
-        resp->putHeader("Content-Type", controller->m_resources->getMimeType(filename));
-        return _return(resp);
-      }
-      auto resp = controller->createResponse(Status::CODE_200,
-                                               controller->m_resources->getResource(filename->c_str()));
+
+      auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>(
+        controller->m_resources->getResource(filename)->openInputStream()
+      );
+      auto resp = OutgoingResponse::createShared(Status::CODE_200, body);
       resp->putHeader("Content-Type", controller->m_resources->getMimeType(filename));
       return _return(resp);
+
     }
     
   };

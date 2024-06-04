@@ -24,87 +24,85 @@
 
 #include "Resources.hpp"
 
+#include "oatpp/data/resource/File.hpp"
+#include "oatpp/data/resource/InMemoryData.hpp"
 #include "oatpp/base/Log.hpp"
 
-#include <stdio.h>
 #include <fstream>
 
 namespace oatpp { namespace swagger {
   
-Resources::Resources(const oatpp::String& resDir, bool streaming) {
-  
-  if(!resDir || resDir->size() == 0) {
+Resources::Resources(const oatpp::String& resDir, bool streaming)
+  : m_resDir(resDir)
+  , m_streaming(streaming)
+{
+
+  if(!resDir || resDir->empty()) {
     throw std::runtime_error("[oatpp::swagger::Resources::Resources()]: Invalid resDir path. Please specify full path to oatpp-swagger/res folder");
   }
-  
-  m_resDir = resDir;
-  if(m_resDir->data()[m_resDir->size() - 1] != '/') {
-    m_resDir = m_resDir + "/";
-  }
 
-  m_streaming = streaming;
+  addResource("favicon-16x16.png");
+  addResource("favicon-32x32.png");
+  addResource("index.css");
+  addResource("index.html");
+  addResource("oauth2-redirect.html");
+  addResource("swagger-initializer.js");
+  addResource("swagger-ui-bundle.js");
+  addResource("swagger-ui-bundle.js.map");
+  addResource("swagger-ui-es-bundle-core.js");
+  addResource("swagger-ui-es-bundle-core.js.map");
+  addResource("swagger-ui-es-bundle.js");
+  addResource("swagger-ui-es-bundle.js.map");
+  addResource("swagger-ui-standalone-preset.js");
+  addResource("swagger-ui-standalone-preset.js.map");
+  addResource("swagger-ui.css");
+  addResource("swagger-ui.css.map");
+  addResource("swagger-ui.js");
+  addResource("swagger-ui.js.map");
 
 }
   
-void Resources::cacheResource(const char* fileName) {
-  m_resources[fileName] = loadFromFile(fileName);
-}
-  
-oatpp::String Resources::loadFromFile(const char* fileName) {
-  
-  auto fullFilename = m_resDir + fileName;
-  
-  std::ifstream file (fullFilename->c_str(), std::ios::in|std::ios::binary|std::ios::ate);
-  
-  if (file.is_open()) {
-    
-    auto result = oatpp::String((v_int32) file.tellg());
-    file.seekg(0, std::ios::beg);
-    file.read((char*)result->data(), result->size());
-    file.close();
-    return result;
-    
+void Resources::addResource(const oatpp::String& fileName) {
+
+  if(m_streaming) {
+    m_resources[fileName] = std::make_shared<data::resource::File>(m_resDir, fileName);
+  } else {
+    auto path = data::resource::File::concatDirAndName(m_resDir, fileName);
+    auto data = oatpp::String::loadFromFile(path->c_str());
+    if(!data) {
+      OATPP_LOGe("oatpp::swagger::Resources::addResource()", "Can't load file '{}'", path);
+      throw std::runtime_error("[oatpp::swagger::Resources::addResource()]: Can't load file. Please make sure you specified full path to oatpp-swagger/res folder");
+    }
+    m_resources[fileName] = std::make_shared<data::resource::InMemoryData>(data);
   }
-  
-  OATPP_LOGe("oatpp::swagger::Resources::loadFromFile()", "Can't load file '{}'", fullFilename);
-  throw std::runtime_error("[oatpp::swagger::Resources::loadFromFile(...)]: Can't load file. Please make sure you specified full path to oatpp-swagger/res folder");
-  
 }
-  
-oatpp::String Resources::getResource(const oatpp::String& filename) {
+
+void Resources::overrideResource(const oatpp::String& filename, const std::shared_ptr<data::resource::Resource>& resource) {
+  m_resources[filename] = resource;
+}
+
+std::shared_ptr<data::resource::Resource> Resources::getResource(const oatpp::String& filename) const {
 
   auto it = m_resources.find(filename);
   if(it != m_resources.end()) {
     return it->second;
   }
-  throw std::runtime_error(
-                           "[oatpp::swagger::Resources::getResource(...)]: Resource file not found. "
+  throw std::runtime_error("[oatpp::swagger::Resources::getResource()]: Resource file not found. "
                            "Please make sure: "
                            "1. You are using correct version of oatpp-swagger. "
                            "2. oatpp-swagger/res is not empty. "
-                           "3. You specified correct full path to oatpp-swagger/res folder"
-                           );
+                           "3. You specified correct full path to oatpp-swagger/res folder");
 }
 
-std::shared_ptr<Resources::ReadCallback> Resources::getResourceStream(const oatpp::String &filename) {
-  try {
-    return std::make_shared<ReadCallback>(m_resDir + filename);
-  } catch(std::runtime_error &e) {
-    throw std::runtime_error(
-        "[oatpp::swagger::Resources::getResource(...)]: Resource file not found. "
-        "Please make sure: "
-        "1. You are using correct version of oatpp-swagger. "
-        "2. oatpp-swagger/res is not empty. "
-        "3. You specified correct full path to oatpp-swagger/res folder"
-    );
+oatpp::String Resources::getResourceData(const oatpp::String& filename) const {
+  auto resource = getResource(filename);
+  if(resource->getInMemoryData() && resource->getKnownSize() > 0) {
+    return resource->getInMemoryData();
   }
-}
-
-Resources::ReadCallback::ReadCallback(const oatpp::String &file) : m_file(file), m_stream(file->c_str())
-{}
-
-v_io_size Resources::ReadCallback::read(void *buffer, v_buff_size count, async::Action& action) {
-  return m_stream.read(buffer, count, action);
+  v_char8 buffer[1024];
+  oatpp::data::stream::BufferOutputStream ss(1024);
+  oatpp::data::stream::transfer(resource->openInputStream(), &ss, 0, buffer, 1024);
+  return ss.toString();
 }
 
 bool Resources::hasEnding(std::string fullString, std::string const &ending) const {
@@ -127,6 +125,10 @@ std::string Resources::getMimeType(const std::string &filename) const {
     if (hasEnding(filename, ".js")) return "text/javascript";
     if (hasEnding(filename, ".xml")) return "text/xml";
     return "text/plain";
+}
+
+bool Resources::isStreaming() const {
+  return m_streaming;
 }
 
 }}
