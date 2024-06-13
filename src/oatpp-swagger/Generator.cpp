@@ -254,6 +254,10 @@ void Generator::addParamsToParametersList(const PathItemParameters& paramsList,
 {
 
   for(auto& paramName : params.getOrder()) {
+    if(paramName == oatpp::web::protocol::http::Header::AUTHORIZATION) {
+        continue;
+    }
+
     auto param = params[paramName];
     auto parameter = oas3::PathItemParameter::createShared();
     parameter->in = inType;
@@ -417,17 +421,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
 
       operation->parameters = {};
 
-      Endpoint::Info::Params filteredHeaders;
-      if(!info->headers.getOrder().empty()) {
-        for (const auto &header : info->headers.getOrder()) {
-          // We don't want the Authorization header listed as Parameter. This should be done in ENDPOINT_INFO() { info->addSecurityRequirement( /* SecurityScheme-Name */ ); }
-          if (header != oatpp::web::protocol::http::Header::AUTHORIZATION) {
-            filteredHeaders[header] = info->headers[header];
-          }
-        }
-      }
-
-      addParamsToParametersList(operation->parameters, filteredHeaders, "header", usedTypes);
+      addParamsToParametersList(operation->parameters, info->headers, "header", usedTypes);
       addParamsToParametersList(operation->parameters, info->pathParams, "path", usedTypes);
       addParamsToParametersList(operation->parameters, info->queryParams, "query", usedTypes);
 
