@@ -130,11 +130,15 @@ oatpp::Object<oas3::Schema> Generator::generateSchemaForTypeObject(const Type* t
       result->properties[p->name] = generateSchemaForType(p->type, true, usedTypes, p, defaultValue);
     }
 
-    result->required = oatpp::List<oatpp::String>::createShared();
+    auto required = oatpp::List<oatpp::String>::createShared();
     for (auto* p : properties->getList()) {
       if (p->info.required) {
-        result->required->push_back(p->name);
+        required->push_back(p->name);
       }
+    }
+
+    if (!required->empty()) {
+      result->required = required;
     }
 
     return result;
