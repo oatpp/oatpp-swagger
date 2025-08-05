@@ -374,7 +374,7 @@ oatpp::Fields<Object<oas3::OperationResponse>> Generator::generateResponses(cons
 
 }
 
-void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<oas3::PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
+void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<oas3::PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes, UsedTags &usedTags) {
 
   auto info = endpoint->info();
 
@@ -389,6 +389,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
       operation->tags = oatpp::List<String>({});
       for(auto& tag : info->tags) {
         operation->tags->push_back(tag);
+        usedTags[tag] = true;
       }
     }
 
@@ -471,7 +472,7 @@ void Generator::generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, 
   }
 }
 
-Generator::Paths Generator::generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes) {
+Generator::Paths Generator::generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes, UsedTags &usedTags) {
 
   auto result = Paths::createShared();
 
@@ -490,7 +491,7 @@ Generator::Paths Generator::generatePaths(const Endpoints& endpoints, UsedTypes&
         pathItem = oas3::PathItem::createShared();
       }
 
-      generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes);
+      generatePathItemData(endpoint, pathItem, usedTypes, usedSecuritySchemes, usedTags);
     }
   }
 
@@ -603,6 +604,54 @@ oatpp::Object<oas3::Components> Generator::generateComponents(const UsedTypes &d
   
 }
 
+Generator::Tags Generator::generateTags(const std::shared_ptr<std::list<std::shared_ptr<oatpp::swagger::Tag>>> &tags,
+                             const UsedTags &usedTags) {
+  auto result = Tags::createShared();
+
+  UsedTags missingTags{ usedTags};
+
+  if (tags) {
+    for (const auto &tag : *tags) {
+      if (!tag || !tag->name) {
+        continue;
+      }
+
+      if ( usedTags.find(tag->name)== usedTags.end()) {
+        continue;
+      }
+
+      missingTags.erase(tag->name);
+
+      auto oasTagItem = oatpp::swagger::oas3::TagItem::createShared();
+      oasTagItem->name = tag->name;
+      oasTagItem->description = tag->description;
+      if (tag->externalDocs) {
+        oasTagItem->externalDocs = generateExternalDocs(*tag->externalDocs);
+      }
+
+      result->push_back(oasTagItem);
+    }
+  }
+
+  // Add placeholder tags that where discovered but were missing in the declaration.
+  for (const auto &missingTag : missingTags) {
+    auto oasTagItem = oatpp::swagger::oas3::TagItem::createShared();
+    oasTagItem->name = missingTag.first;
+    result->push_back(oasTagItem);
+  }
+
+  return result;
+}
+
+oatpp::Object<oas3::ExternalDocumentation> Generator::generateExternalDocs(const ExternalDocumentation &externalDocs) {
+
+  auto oasExternalDocumentation = oatpp::swagger::oas3::ExternalDocumentation::createShared();
+  oasExternalDocumentation->url = externalDocs.url;
+  oasExternalDocumentation->description = externalDocs.description;
+
+  return oasExternalDocumentation;
+}
+
 
 oatpp::Object<oas3::SecurityScheme> Generator::generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss) {
   auto oasSS = oatpp::swagger::oas3::SecurityScheme::createShared();
@@ -687,9 +736,16 @@ oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<
 
   }
   
+  if (docInfo->externalDocs) {
+    document->externalDocs = generateExternalDocs(*docInfo->externalDocs);
+  }
+
   UsedTypes usedTypes;
   UsedSecuritySchemes usedSecuritySchemes;
-  document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes);
+  UsedTags usedTags;
+
+  document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes, usedTags);
+  document->tags = generateTags(docInfo->tags, usedTags);
   auto decomposedTypes = decomposeTypes(usedTypes);
   document->components = generateComponents(decomposedTypes, docInfo->securitySchemes, usedSecuritySchemes);
 

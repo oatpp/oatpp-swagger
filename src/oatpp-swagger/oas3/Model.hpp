@@ -513,6 +513,24 @@ class SecurityScheme : public oatpp::DTO {
 };
 
 /**
+ * ExternalDocumentation object
+ */
+class ExternalDocumentation : public oatpp::DTO {
+  DTO_INIT(ExternalDocumentation, DTO)
+
+  /**
+   * Description.
+   */
+  DTO_FIELD(String, description);
+
+
+  /**
+   * URL
+   */
+  DTO_FIELD(String, url);
+};
+
+/**
  * Operation Response.
  */
 class OperationResponse : public oatpp::DTO {
@@ -597,6 +615,12 @@ class PathItemParameter : public oatpp::DTO {
    */
   DTO_FIELD(Fields<Object<Example>>, examples);
 
+  /**
+   * External documentation.
+   */
+
+   DTO_FIELD(Object<ExternalDocumentation>, externalDocs);
+   
 public:
 
   Object<Example> addExample(const String& title, const Any& value) {
@@ -734,6 +758,29 @@ class Components : public oatpp::DTO {
 
 };
 
+
+/**
+ * Tag item.
+ */
+class TagItem : public oatpp::DTO {
+  DTO_INIT(TagItem, DTO)
+
+  /**
+   * Name.
+   */
+  DTO_FIELD(String, name);
+
+  /**
+   * Description.
+   */
+  DTO_FIELD(String, description);
+
+  /**
+   * Description.
+   */
+  DTO_FIELD(Object<ExternalDocumentation>, externalDocs);
+};
+
 /**
  * Document.
  */
@@ -765,9 +812,19 @@ class Document : public oatpp::DTO {
    * &l:Components;.
    */
   DTO_FIELD(Object<Components>, components);
-  
+
+  /**
+   * List of &l:Tags;.
+   */
+  DTO_FIELD(List<Object<TagItem>>, tags);
+
+  /**
+   * &l:ExternalDocs;.
+   */
+  DTO_FIELD(Object<ExternalDocumentation>, externalDocs);
+
 };
-  
+
 #include OATPP_CODEGEN_END(DTO)
 }}}
 

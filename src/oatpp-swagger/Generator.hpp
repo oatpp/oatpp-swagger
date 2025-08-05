@@ -58,6 +58,10 @@ public:
 
   typedef std::unordered_map<oatpp::String, bool> UsedSecuritySchemes;
 
+  typedef std::unordered_map<oatpp::String, bool> UsedTags;
+
+  typedef oatpp::List<Object<oas3::TagItem>> Tags;
+
 private:
   void addParamsToParametersList(const PathItemParameters& paramsList,
                                         Endpoint::Info::Params& params,
@@ -76,12 +80,12 @@ private:
 
   oatpp::Object<oas3::RequestBody> generateRequestBody(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
   Fields<Object<oas3::OperationResponse>> generateResponses(const Endpoint::Info& endpointInfo, bool linkSchema, UsedTypes& usedTypes);
-  void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<oas3::PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+  void generatePathItemData(const std::shared_ptr<Endpoint>& endpoint, const oatpp::Object<oas3::PathItem>& pathItem, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes, UsedTags &usedTags);
   
   /*
    *  UsedTypes& usedTypes is used to put Types of objects whos schema should be reused
    */
-  Paths generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes);
+  Paths generatePaths(const Endpoints& endpoints, UsedTypes& usedTypes, UsedSecuritySchemes &usedSecuritySchemes, UsedTags &usedTags);
 
   oatpp::Object<oas3::SecurityScheme> generateSecurityScheme(const std::shared_ptr<oatpp::swagger::SecurityScheme> &ss);
 
@@ -95,6 +99,11 @@ private:
   oatpp::Object<oas3::Components> generateComponents(const UsedTypes &decomposedTypes,
                                                      const std::shared_ptr<std::unordered_map<oatpp::String,std::shared_ptr<oatpp::swagger::SecurityScheme>>> &securitySchemes,
                                                      UsedSecuritySchemes &usedSecuritySchemes);
+
+  Tags generateTags(const std::shared_ptr<std::list<std::shared_ptr<oatpp::swagger::Tag>>> &tags,
+                    const UsedTags &usedTags);
+
+  oatpp::Object<oas3::ExternalDocumentation> generateExternalDocs(const ExternalDocumentation &externalDocs);
 
 public:
 

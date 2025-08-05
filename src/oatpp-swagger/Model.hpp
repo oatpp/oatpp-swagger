@@ -306,6 +306,52 @@ struct SecurityScheme {
 };
 
 /**
+ * External documentation object - https://swagger.io/specification/#external-documentation-object .
+ */
+
+struct ExternalDocumentation {
+
+  static std::shared_ptr<ExternalDocumentation> createShared() {
+    return std::make_shared<ExternalDocumentation>();
+  }
+
+  /**
+   * Description
+   */
+  oatpp::String description;
+
+  /**
+   * Url
+   */
+  oatpp::String url;
+};
+
+/**
+ * Tag object - https://swagger.io/specification/#tag-object .
+ */
+struct Tag {
+
+  static std::shared_ptr<Tag> createShared() {
+    return std::make_shared<Tag>();
+  }
+
+  /**
+   * Name
+   */
+  oatpp::String name;
+
+  /**
+   * Description
+   */
+  oatpp::String description;
+
+  /**
+   * External Documentation
+   */
+  std::shared_ptr<ExternalDocumentation> externalDocs;
+};
+
+/**
  * Document Info.
  */
 class DocumentInfo {
@@ -333,6 +379,16 @@ public:
    * Map of &id:oatpp::String; to &l:SecurityScheme;.
    */
    std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecurityScheme>>> securitySchemes;
+
+   /**
+   * List of &l:Tag;.
+   */
+   std::shared_ptr<std::list<std::shared_ptr<Tag>>> tags;
+
+   /**
+   * &l:ExternalDocumentation;.
+   */
+   std::shared_ptr<ExternalDocumentation> externalDocs;
 
   /**
    * SecurityScheme Builder.
@@ -604,6 +660,8 @@ public:
     std::shared_ptr<DocumentHeader> m_header;
     std::shared_ptr<std::list<std::shared_ptr<Server>>> m_servers;
     std::shared_ptr<std::unordered_map<oatpp::String, std::shared_ptr<SecurityScheme>>> m_securitySchemes;
+    std::shared_ptr<ExternalDocumentation> m_externalDocs;
+    std::shared_ptr<std::list<std::shared_ptr<Tag>>> m_tags;
 
   private:
 
@@ -637,6 +695,21 @@ public:
       return m_securitySchemes;
     }
     
+    std::shared_ptr<ExternalDocumentation> getExternalDocs() {
+      if(!m_externalDocs) {
+        m_externalDocs = ExternalDocumentation::createShared();
+      }
+      return m_externalDocs;
+    }
+
+    std::shared_ptr<std::list<std::shared_ptr<Tag>>> getTags() {
+      if (!m_tags)
+      {
+        m_tags = std::make_shared<std::list<std::shared_ptr<Tag>>>();
+      }
+      return m_tags;
+    }
+
   public:
 
     /**
@@ -719,6 +792,11 @@ public:
       return *this;
     }
 
+    Builder& setExternalDocs(const oatpp::String &url, const oatpp::String &description) {
+      getExternalDocs()->url = url;
+      getExternalDocs()->description = description;
+      return *this;
+    }
     /**
      * Set license url.
      * @param url
@@ -771,6 +849,43 @@ public:
     }
 
     /**
+     * Add &l:Tag.
+     * @param name
+     * @param description
+     * @return - &l:DocumentInfo::Builder;.
+     */
+    Builder& addTag(const oatpp::String& name, const oatpp::String& description) {
+      auto tag = Tag::createShared();
+      tag->name = name;
+      tag->description = description;
+
+      getTags()->push_back(tag);
+      return *this;
+    }
+
+     /**
+     * Add &l:ExternalDocumentation to &l:Tag
+     * @param tagname
+     * @param description
+     * @param url
+     * @return - &l:DocumentInfo::Builder;.
+     */
+    Builder& setExternalDocsForTag(const oatpp::String& tagName, const oatpp::String& url, const oatpp::String& description ) {
+
+      for (auto tag : *getTags())
+      {
+        if (tag->name == tagName)
+        {
+          tag->externalDocs = ExternalDocumentation::createShared();
+          tag->externalDocs->url = url;
+          tag->externalDocs->description = description;
+          break;
+        }
+      }
+      return *this;
+    }
+
+    /**
      * Build Document Info.
      * @return - &l:DocumentInfo;.
      */
@@ -779,6 +894,8 @@ public:
       document->header = m_header;
       document->servers = m_servers;
       document->securitySchemes = m_securitySchemes;
+      document->tags = m_tags;
+      document->externalDocs = m_externalDocs;
       return document;
     }
     
