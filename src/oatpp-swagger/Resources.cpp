@@ -31,7 +31,12 @@
 #include <fstream>
 
 namespace oatpp { namespace swagger {
-  
+
+Resources::Resources(bool streaming)
+  : m_streaming(streaming)
+{
+}
+
 Resources::Resources(const oatpp::String& resDir, bool streaming)
   : m_resDir(resDir)
   , m_streaming(streaming)
@@ -105,7 +110,7 @@ oatpp::String Resources::getResourceData(const oatpp::String& filename) const {
   return ss.toString();
 }
 
-bool Resources::hasEnding(std::string fullString, std::string const &ending) const {
+bool Resources::hasEnding(std::string fullString, std::string const &ending) {
     std::transform(fullString.begin(), fullString.end(), fullString.begin(),
                    [](unsigned char c) { return std::tolower(c); });
     if (fullString.length() >= ending.length()) {
