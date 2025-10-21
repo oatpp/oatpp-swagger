@@ -44,7 +44,9 @@ private:
   std::unordered_map<oatpp::String, std::shared_ptr<data::resource::Resource>> m_resources;
 private:
   void addResource(const oatpp::String& fileName);
-  bool hasEnding(std::string fullString, std::string const &ending) const;
+  static bool hasEnding(std::string fullString, std::string const &ending);
+protected:
+  Resources(bool streaming = false);
 public:
   /**
    * Constructor.
@@ -61,7 +63,7 @@ public:
    * @return
    */
   static std::shared_ptr<Resources> loadResources(const oatpp::String& resDir, bool streaming = false) {
-    return std::make_shared<Resources>(resDir, false);
+    return std::make_shared<Resources>(resDir, streaming);
   }
 
   /**
@@ -69,34 +71,34 @@ public:
    * @param filename
    * @param resource
    */
-  void overrideResource(const oatpp::String& filename, const std::shared_ptr<data::resource::Resource>& resource);
+  virtual void overrideResource(const oatpp::String& filename, const std::shared_ptr<data::resource::Resource>& resource);
 
   /**
    * Get resource by filename.
    * @param filename - name of the resource file.
    * @return - &id:oatpp::data::resource::Resource;
    */
-  std::shared_ptr<data::resource::Resource> getResource(const oatpp::String& filename) const;
+  virtual std::shared_ptr<data::resource::Resource> getResource(const oatpp::String& filename) const;
 
   /**
    * Get resource data.
    * @param filename
    * @return
    */
-  oatpp::String getResourceData(const oatpp::String& filename) const;
+  virtual oatpp::String getResourceData(const oatpp::String& filename) const;
 
   /**
    * Returns the MIME type for a given filename
    * @param filename to return the MIME type
    * @return a MIME type
    */
-  std::string getMimeType(const std::string &filename) const;
+  virtual std::string getMimeType(const std::string &filename) const;
 
   /**
    * Returns true if this is a streaming ressource instance.
    * @return
    */
-  bool isStreaming() const;
+  virtual bool isStreaming() const;
 
 };
   
