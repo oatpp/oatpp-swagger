@@ -6,8 +6,12 @@ macro(target_link_oatpp target)
 
         target_link_libraries(${target}
                 PRIVATE oatpp::oatpp
-                PRIVATE oatpp::oatpp-test
         )
+		if(OATPP_LINK_TEST_LIBRARY)
+			target_link_libraries(${target}
+					PRIVATE oatpp::oatpp-test
+			)
+		endif()
 
     else()
 
@@ -17,8 +21,12 @@ macro(target_link_oatpp target)
         #target_link_directories(${target} PRIVATE ${OATPP_DIR_LIB})
         target_link_libraries(${target}
                 PRIVATE oatpp
-                PRIVATE oatpp-test
         )
+		if(OATPP_LINK_TEST_LIBRARY)
+			target_link_libraries(${target}
+					PRIVATE oatpp-test
+			)
+		endif()
 
     endif()
 
