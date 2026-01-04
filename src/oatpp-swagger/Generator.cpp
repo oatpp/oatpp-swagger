@@ -686,7 +686,15 @@ oatpp::Object<oas3::Document> Generator::generateDocument(const std::shared_ptr<
     }
 
   }
-  
+
+  if(docInfo->tags) {
+      document->tags = {};
+
+      for(const auto &it : *docInfo->tags) {
+          document->tags->push_back(oas3::Tag::createFromBaseModel(it));
+      }
+  }
+
   UsedTypes usedTypes;
   UsedSecuritySchemes usedSecuritySchemes;
   document->paths = generatePaths(endpoints, usedTypes, usedSecuritySchemes);
